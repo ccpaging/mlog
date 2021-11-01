@@ -5,7 +5,6 @@ package mlog
 import (
 	"fmt"
 	"io"
-	"log"
 	stdlog "log"
 	"os"
 	"sync/atomic"
@@ -40,7 +39,7 @@ func New(out io.Writer, prefix string, flag int) *Logger {
 	return &Logger{Logger: stdlog.New(out, prefix, flag)}
 }
 
-var std = New(os.Stderr, "", log.LstdFlags)
+var std = New(os.Stderr, "", stdlog.LstdFlags)
 
 // Default returns the standard logger used by the package-level output functions.
 func Default() *Logger { return std }

@@ -119,29 +119,7 @@ func (w *Writer) connect() (err error) {
 
 // Write sends a log message to the syslog daemon.
 func (w *Writer) Write(b []byte) (int, error) {
-	severity := w.priority
-	if len(b) >= 3 && b[0] == '<' && b[2] == '>' {
-		switch b[1] {
-		case '0':
-			severity = LOG_EMERG
-		case '1':
-			severity = LOG_ALERT
-		case '2':
-			severity = LOG_CRIT
-		case '3':
-			severity = LOG_ERR
-		case '4':
-			severity = LOG_WARNING
-		case '5':
-			severity = LOG_NOTICE
-		case '6':
-			severity = LOG_INFO
-		case '7':
-			severity = LOG_DEBUG
-		}
-		return w.writeAndRetry(severity, string(b[3:]))
-	}
-	return w.writeAndRetry(severity, string(b))
+	return w.writeAndRetry(w.priority, string(b))
 }
 
 // Close closes a connection to the syslog daemon.

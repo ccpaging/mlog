@@ -8,8 +8,8 @@ package syslog_test
 
 import (
 	"fmt"
+	"github.com/ccpaging/log/syslog"
 	"log"
-	"log/syslog"
 )
 
 func ExampleDial() {

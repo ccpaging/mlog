@@ -9,7 +9,6 @@ package syslog
 import (
 	"fmt"
 	stdlog "log"
-	"strconv"
 )
 
 // The Priority is a combination of the syslog facility and
@@ -69,6 +68,7 @@ const (
 
 type Logger struct {
 	*stdlog.Logger
+	out *Writer
 }
 
 // NewLogger creates a log.Logger whose output is written to the
@@ -76,64 +76,76 @@ type Logger struct {
 // the syslog facility and severity. The logFlag argument is the flag
 // set passed through to log.New to create the Logger.
 func NewLogger(p Priority, logFlag int) (*Logger, error) {
-	s, err := New(p, "")
+	out, err := Dial("", "", p, "")
 	if err != nil {
 		return nil, err
 	}
 
 	return &Logger{
-		Logger: stdlog.New(s, "", logFlag|stdlog.Llevel),
+		Logger: stdlog.New(out, "", logFlag),
+		out:    out,
 	}, nil
 }
 
-func (l *Logger) pr(severity Priority) string {
-	return "<" + strconv.Itoa(int(severity)) + ">"
+func (l *Logger) Close() error {
+	if l.out != nil {
+		return l.out.Close()
+	}
+	return nil
 }
 
 // Emerg logs a message with severity LOG_EMERG, ignoring the severity
 // passed to New.
 func (l *Logger) Emerg(v ...interface{}) error {
-	return l.OutputL(2, l.pr(LOG_EMERG), fmt.Sprint(v...))
+	_, err := l.out.writeAndRetry(LOG_EMERG, fmt.Sprintln(v...))
+	return err
 }
 
 // Alert logs a message with severity LOG_ALERT, ignoring the severity
 // passed to New.
 func (l *Logger) Alert(v ...interface{}) error {
-	return l.OutputL(2, l.pr(LOG_ALERT), fmt.Sprint(v...))
+	_, err := l.out.writeAndRetry(LOG_ALERT, fmt.Sprintln(v...))
+	return err
 }
 
 // Crit logs a message with severity LOG_CRIT, ignoring the severity
 // passed to New.
 func (l *Logger) Crit(v ...interface{}) error {
-	return l.OutputL(2, l.pr(LOG_CRIT), fmt.Sprint(v...))
+	_, err := l.out.writeAndRetry(LOG_CRIT, fmt.Sprintln(v...))
+	return err
 }
 
 // Err logs a message with severity LOG_ERR, ignoring the severity
 // passed to New.
 func (l *Logger) Err(v ...interface{}) error {
-	return l.OutputL(2, l.pr(LOG_ERR), fmt.Sprint(v...))
+	_, err := l.out.writeAndRetry(LOG_ERR, fmt.Sprintln(v...))
+	return err
 }
 
 // Warning logs a message with severity LOG_WARNING, ignoring the
 // severity passed to New.
 func (l *Logger) Warning(v ...interface{}) error {
-	return l.OutputL(2, l.pr(LOG_WARNING), fmt.Sprint(v...))
+	_, err := l.out.writeAndRetry(LOG_WARNING, fmt.Sprintln(v...))
+	return err
 }
 
 // Notice logs a message with severity LOG_NOTICE, ignoring the
 // severity passed to New.
 func (l *Logger) Notice(v ...interface{}) error {
-	return l.OutputL(2, l.pr(LOG_NOTICE), fmt.Sprint(v...))
+	_, err := l.out.writeAndRetry(LOG_NOTICE, fmt.Sprintln(v...))
+	return err
 }
 
 // Info logs a message with severity LOG_INFO, ignoring the severity
 // passed to New.
 func (l *Logger) Info(v ...interface{}) error {
-	return l.OutputL(2, l.pr(LOG_INFO), fmt.Sprint(v...))
+	_, err := l.out.writeAndRetry(LOG_INFO, fmt.Sprintln(v...))
+	return err
 }
 
 // Debug logs a message with severity LOG_DEBUG, ignoring the severity
 // passed to New.
 func (l *Logger) Debug(v ...interface{}) error {
-	return l.OutputL(2, l.pr(LOG_DEBUG), fmt.Sprint(v...))
+	_, err := l.out.writeAndRetry(LOG_DEBUG, fmt.Sprintln(v...))
+	return err
 }
