@@ -89,13 +89,15 @@ func OpenFile(name string, perm os.FileMode) (*File, error) {
 		return nil, errors.New("path " + name + ": is not a directory")
 	}
 
-	return &File{
+	f := &File{
 		name:    name,
 		perm:    perm,
 		limit:   1024 * 1024,
 		back:    1,
 		bufSize: 2 * os.Getpagesize(),
-	}, nil
+	}
+	f.size = f.fileSize()
+	return f, nil
 }
 
 // SetBufferSize sets bufio writer size. It take effect when next internal
@@ -155,33 +157,29 @@ func (f *File) Close() error {
 	return f.close()
 }
 
-// Write bytes to file, and rolling up automatic.
-func (f *File) Write(b []byte) (n int, err error) {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
-	if f.limit > 0 && f.size > f.limit {
-		f.rolling(f.back)
+func (f *File) open() error {
+	if f.file != nil {
+		return nil
+	}
+	file, err := os.OpenFile(f.name, FileFlag, f.perm)
+	if err != nil {
+		return err
 	}
 
-	if f.file == nil {
-		file, err := os.OpenFile(f.name, FileFlag, f.perm)
-		if err != nil {
-			return 0, err
-		}
-
-		f.file = file
-		f.bufWriter = nil
-		if f.bufSize > 0 {
-			f.bufWriter = bufio.NewWriterSize(f.file, f.bufSize)
-		}
-
-		f.size = 0
-		if fi, err := f.file.Stat(); err == nil {
-			f.size = fi.Size()
-		}
+	f.file = file
+	f.bufWriter = nil
+	if f.bufSize > 0 {
+		f.bufWriter = bufio.NewWriterSize(f.file, f.bufSize)
 	}
 
+	f.size = 0
+	if fi, err := f.file.Stat(); err == nil {
+		f.size = fi.Size()
+	}
+	return nil
+}
+
+func (f *File) write(b []byte) (n int, err error) {
 	if f.bufWriter != nil {
 		n, err = f.bufWriter.Write(b)
 	} else {
@@ -191,7 +189,23 @@ func (f *File) Write(b []byte) (n int, err error) {
 	if err == nil {
 		f.size += int64(n)
 	}
-	return n, err
+	return
+}
+
+// Write bytes to file, and rolling up automatic.
+func (f *File) Write(b []byte) (n int, err error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	if f.limit > 0 && f.size > f.limit {
+		f.rolling(f.back)
+	}
+
+	if err := f.open(); err != nil {
+		return 0, err
+	}
+
+	return f.write(b)
 }
 
 func (f *File) rolling(n int) {
@@ -274,11 +288,7 @@ func (f *File) Stat() (os.FileInfo, error) {
 	return os.Stat(f.name)
 }
 
-// Size returns the size of file.
-func (f *File) Size() int64 {
-	f.mu.RLock()
-	defer f.mu.RUnlock()
-
+func (f *File) fileSize() int64 {
 	if f.file != nil {
 		return f.size
 	}
@@ -287,4 +297,12 @@ func (f *File) Size() int64 {
 		return f.size
 	}
 	return fi.Size()
+}
+
+// Size returns the size of file.
+func (f *File) Size() int64 {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+
+	return f.fileSize()
 }

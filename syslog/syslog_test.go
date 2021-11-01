@@ -221,12 +221,17 @@ func TestNewLogger(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping syslog test during -short")
 	}
-	f, err := NewLogger(LOG_USER|LOG_INFO, 0)
-	if f == nil {
+	out, err := Dial("", "", LOG_USER|LOG_INFO, "")
+	if err != nil {
 		if err.Error() == "Unix syslog delivery error" {
 			t.Skip("skipping: syslogd not running")
 		}
 		t.Error(err)
+	}
+	l := NewLogger(out, 0)
+	defer l.Close()
+	if l == nil {
+		t.Fatal("NewLogger() failed")
 	}
 }
 

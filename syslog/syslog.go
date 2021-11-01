@@ -71,20 +71,31 @@ type Logger struct {
 	out *Writer
 }
 
-// NewLogger creates a log.Logger whose output is written to the
-// system log service with the specified priority, a combination of
-// the syslog facility and severity. The logFlag argument is the flag
-// set passed through to log.New to create the Logger.
-func NewLogger(p Priority, logFlag int) (*Logger, error) {
-	out, err := Dial("", "", p, "")
+// New establishes a new connection to the system log daemon. Each
+// write to the returned writer sends a log message with the given
+// priority (a combination of the syslog facility and severity) and
+// prefix tag. If tag is empty, the os.Args[0] is used.
+func New(priority Priority, tag string) (*Logger, error) {
+	out, err := Dial("", "", priority, tag)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Logger{
-		Logger: stdlog.New(out, "", logFlag),
+		Logger: stdlog.New(out, "", 0),
 		out:    out,
 	}, nil
+}
+
+// NewLogger creates a log.Logger whose output is written to the
+// system log service with the specified priority, a combination of
+// the syslog facility and severity. The logFlag argument is the flag
+// set passed through to log.New to create the Logger.
+func NewLogger(out *Writer, logFlag int) *Logger {
+	return &Logger{
+		Logger: stdlog.New(out, "", logFlag),
+		out:    out,
+	}
 }
 
 func (l *Logger) Close() error {

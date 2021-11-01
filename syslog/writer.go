@@ -44,14 +44,6 @@ type netConn struct {
 	conn  net.Conn
 }
 
-// New establishes a new connection to the system log daemon. Each
-// write to the returned writer sends a log message with the given
-// priority (a combination of the syslog facility and severity) and
-// prefix tag. If tag is empty, the os.Args[0] is used.
-func New(priority Priority, tag string) (*Writer, error) {
-	return Dial("", "", priority, tag)
-}
-
 // Dial establishes a connection to a log daemon by connecting to
 // address raddr on the specified network. Each write to the returned
 // writer sends a log message with the facility and severity
