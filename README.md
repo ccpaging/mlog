@@ -1,6 +1,6 @@
 # The 3rd log examples
 
-[![License](https://img.shields.io/pypi/l/Django.svg)](https://github.com/ccpaging/log/blob/master/LICENSE) [![GoDoc](https://godoc.org/github.com/ccpaging/log?status.svg)](https://godoc.org/github.com/ccpaging/log) [![Build Status](https://github.com/ccpaging/log/actions/workflows/go.yml/badge.svg)](https://github.com/ccpaging/log/actions/workflows/go.yml) [![Maintainability](https://codeclimate.com/github/ccpaging/log/badges/gpa.svg)](https://codeclimate.com/github/ccpaging/log/maintainability)
+[![License](https://img.shields.io/badge/license-BSD-green)](https://github.com/ccpaging/log/blob/master/LICENSE) [![GoDoc](https://godoc.org/github.com/ccpaging/log?status.svg)](https://godoc.org/github.com/ccpaging/log) [![Build Status](https://github.com/ccpaging/log/actions/workflows/go.yml/badge.svg)](https://github.com/ccpaging/log/actions/workflows/go.yml) [![Maintainability](https://codeclimate.com/github/ccpaging/log/badges/gpa.svg)](https://codeclimate.com/github/ccpaging/log/maintainability)
 
 ## mlog
 
