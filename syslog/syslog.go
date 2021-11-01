@@ -75,8 +75,8 @@ type Logger struct {
 // write to the returned writer sends a log message with the given
 // priority (a combination of the syslog facility and severity) and
 // prefix tag. If tag is empty, the os.Args[0] is used.
-func New(priority Priority, tag string) (*Logger, error) {
-	out, err := Dial("", "", priority, tag)
+func New(network, raddr string, priority Priority, tag string) (*Logger, error) {
+	out, err := Dial(network, raddr, priority, tag)
 	if err != nil {
 		return nil, err
 	}

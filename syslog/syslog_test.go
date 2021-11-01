@@ -145,16 +145,16 @@ func TestWithSimulated(t *testing.T) {
 		if tr == "unix" || tr == "unixgram" {
 			defer os.Remove(addr)
 		}
-		s, err := Dial(tr, addr, LOG_INFO|LOG_USER, "syslog_test")
+		l, err := New(tr, addr, LOG_INFO|LOG_USER, "syslog_test")
 		if err != nil {
 			t.Fatalf("Dial() failed: %v", err)
 		}
-		err = s.Info(msg)
+		err = l.Info(msg)
 		if err != nil {
 			t.Fatalf("log failed: %v", err)
 		}
 		check(t, msg, <-done, tr)
-		s.Close()
+		l.Close()
 	}
 }
 
@@ -170,12 +170,12 @@ func TestFlap(t *testing.T) {
 	defer os.Remove(addr)
 	defer sock.Close()
 
-	s, err := Dial(net, addr, LOG_INFO|LOG_USER, "syslog_test")
+	l, err := New(net, addr, LOG_INFO|LOG_USER, "syslog_test")
 	if err != nil {
 		t.Fatalf("Dial() failed: %v", err)
 	}
 	msg := "Moo 2"
-	err = s.Info(msg)
+	err = l.Info(msg)
 	if err != nil {
 		t.Fatalf("log failed: %v", err)
 	}
@@ -188,13 +188,13 @@ func TestFlap(t *testing.T) {
 
 	// and try retransmitting
 	msg = "Moo 3"
-	err = s.Info(msg)
+	err = l.Info(msg)
 	if err != nil {
 		t.Fatalf("log failed: %v", err)
 	}
 	check(t, msg, <-done, net)
 
-	s.Close()
+	l.Close()
 }
 
 func TestNew(t *testing.T) {
@@ -206,7 +206,7 @@ func TestNew(t *testing.T) {
 		t.Skip("skipping syslog test during -short")
 	}
 
-	s, err := New(LOG_INFO|LOG_USER, "the_tag")
+	l, err := New("", "", LOG_INFO|LOG_USER, "the_tag")
 	if err != nil {
 		if err.Error() == "Unix syslog delivery error" {
 			t.Skip("skipping: syslogd not running")
@@ -214,7 +214,7 @@ func TestNew(t *testing.T) {
 		t.Fatalf("New() failed: %s", err)
 	}
 	// Don't send any messages.
-	s.Close()
+	l.Close()
 }
 
 func TestNewLogger(t *testing.T) {
@@ -307,12 +307,12 @@ func TestWrite(t *testing.T) {
 			addr, sock, srvWG := startServer("udp", "", done)
 			defer srvWG.Wait()
 			defer sock.Close()
-			l, err := Dial("udp", addr, test.pri, test.pre)
+			l, err := New("udp", addr, test.pri, test.pre)
 			if err != nil {
 				t.Fatalf("syslog.Dial() failed: %v", err)
 			}
 			defer l.Close()
-			_, err = io.WriteString(l, test.msg)
+			_, err = io.WriteString(l.Writer(), test.msg)
 			if err != nil {
 				t.Fatalf("WriteString() failed: %v", err)
 			}
@@ -331,7 +331,7 @@ func TestConcurrentWrite(t *testing.T) {
 	addr, sock, srvWG := startServer("udp", "", make(chan string, 1))
 	defer srvWG.Wait()
 	defer sock.Close()
-	w, err := Dial("udp", addr, LOG_USER|LOG_ERR, "how's it going?")
+	w, err := New("udp", addr, LOG_USER|LOG_ERR, "how's it going?")
 	if err != nil {
 		t.Fatalf("syslog.Dial() failed: %v", err)
 	}
@@ -348,6 +348,7 @@ func TestConcurrentWrite(t *testing.T) {
 		}()
 	}
 	wg.Wait()
+	w.Close()
 }
 
 func TestConcurrentReconnect(t *testing.T) {
@@ -390,7 +391,7 @@ func TestConcurrentReconnect(t *testing.T) {
 	for i := 0; i < N; i++ {
 		go func() {
 			defer wg.Done()
-			w, err := Dial(net, addr, LOG_USER|LOG_ERR, "tag")
+			w, err := New(net, addr, LOG_USER|LOG_ERR, "tag")
 			if err != nil {
 				t.Errorf("syslog.Dial() failed: %v", err)
 				return

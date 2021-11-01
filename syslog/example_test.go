@@ -8,16 +8,17 @@ package syslog_test
 
 import (
 	"fmt"
-	"github.com/ccpaging/log/syslog"
 	"log"
+
+	"github.com/ccpaging/log/syslog"
 )
 
 func ExampleDial() {
-	sysLog, err := syslog.Dial("tcp", "localhost:1234",
+	l, err := syslog.New("tcp", "localhost:1234",
 		syslog.LOG_WARNING|syslog.LOG_DAEMON, "demotag")
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprintf(sysLog, "This is a daemon warning with demotag.")
-	sysLog.Emerg("And this is a daemon emergency with demotag.")
+	fmt.Fprintf(l.Writer(), "This is a daemon warning with demotag.")
+	l.Emerg("And this is a daemon emergency with demotag.")
 }
