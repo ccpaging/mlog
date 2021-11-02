@@ -67,7 +67,7 @@ const (
 )
 
 type Logger struct {
-	*stdlog.Logger
+	log *stdlog.Logger
 	out *Writer
 }
 
@@ -82,8 +82,8 @@ func New(network, raddr string, priority Priority, tag string) (*Logger, error) 
 	}
 
 	return &Logger{
-		Logger: stdlog.New(out, "", 0),
-		out:    out,
+		log: stdlog.New(out, "", 0),
+		out: out,
 	}, nil
 }
 
@@ -93,9 +93,14 @@ func New(network, raddr string, priority Priority, tag string) (*Logger, error) 
 // set passed through to log.New to create the Logger.
 func NewLogger(out *Writer, logFlag int) *Logger {
 	return &Logger{
-		Logger: stdlog.New(out, "", logFlag),
-		out:    out,
+		log: stdlog.New(out, "", logFlag),
+		out: out,
 	}
+}
+
+// Writer returns the output destination for the logger.
+func (l *Logger) Writer() *Writer {
+	return l.out
 }
 
 func (l *Logger) Close() error {
