@@ -12,9 +12,13 @@ import (
 
 // 0, Black; 1, Red; 2, Green; 3, Yellow; 4, Blue; 5, Purple; 6, Cyan; 7, White
 var (
-	colorDebug = []byte("\033[32m")
-	colorWarn  = []byte("\033[33m")
-	colorError = []byte("\033[31m")
+	colors = [][]byte{
+		[]byte("\033[32m"), // Debug
+		[]byte("\033[36m"), // Trace
+		nil,                // Info
+		[]byte("\033[33m"), // Warn
+		[]byte("\033[31m"), // Error
+	}
 	colorReset = []byte("\033[0m")
 )
 
@@ -24,13 +28,11 @@ type ansiTermWriter struct {
 
 func (t *ansiTermWriter) Write(b []byte) (n int, err error) {
 	var cb []byte
-	switch {
-	case bytes.Contains(b, []byte("DEBUG")):
-		cb = colorDebug
-	case bytes.Contains(b, []byte("WARN ")):
-		cb = colorWarn
-	case bytes.Contains(b, []byte("ERROR")):
-		cb = colorError
+	if len(b) > 0 {
+		level := bytes.IndexByte([]byte("DTIWE"), b[0])
+		if level >= 0 {
+			cb = colors[level]
+		}
 	}
 	if len(cb) == 0 {
 		return t.w.Write(b)
@@ -47,8 +49,9 @@ func TestAnsiTerm(t *testing.T) {
 	w := &ansiTermWriter{w: os.Stdout}
 	logger := New(w, "", log.Lshortfile)
 
-	logger.Debug("This is a debug")
-	logger.Info("This is a info")
-	logger.Warn("This is a warn")
-	logger.Error("This is a error")
+	logger.Debugln("This is a debug")
+	logger.Traceln("This is a trace")
+	logger.Infoln("This is a info")
+	logger.Warnln("This is a warn")
+	logger.Errorln("This is a error")
 }
