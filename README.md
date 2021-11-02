@@ -25,6 +25,8 @@ func main() {
 }
 ```
 
+[golangexample](https://golangexample.com/multi-level-logger-based-on-go-std-log/)
+
 Issues:
 
-[#48464](https://github.com/golang/go/issues/48464) [#48503](https://github.com/golang/go/issues/48503) [#28412](https://github.com/golang/go/issues/28412)  [#13182](https://github.com/golang/go/issues/13182) [#28327](https://github.com/golang/go/issues/28327) [#32062](https://github.com/golang/go/issues/32062)
+[#13182](https://github.com/golang/go/issues/13182) [#48464](https://github.com/golang/go/issues/48464) [#48503](https://github.com/golang/go/issues/48503) [#28412](https://github.com/golang/go/issues/28412) [#28327](https://github.com/golang/go/issues/28327) [#32062](https://github.com/golang/go/issues/32062)
