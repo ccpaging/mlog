@@ -16,17 +16,12 @@ NOTHING ELSE
 package main
 
 import (
-	"log"
-	"os"
-
-	"github.com/ccpaging/log/mlog"
+    log "github.com/ccpaging/log/mlog"
 )
 
-var logger = mlog.New(os.Stdout, "main: ", log.LstdFlags)
-
 func main() {
-	logger.Debugln("This is Debug")
-	logger.Infoln("This is Info")
+    log.Debug("This is Debug")
+    log.Info("This is Info")
 }
 ```
 
