@@ -49,9 +49,9 @@ func TestAnsiTerm(t *testing.T) {
 	w := &ansiTermWriter{w: os.Stdout}
 	logger := New(w, "", log.Lshortfile)
 
-	logger.Debugln("This is a debug")
-	logger.Traceln("This is a trace")
-	logger.Infoln("This is a info")
-	logger.Warnln("This is a warn")
-	logger.Errorln("This is a error")
+	logger.Debug("This is a debug")
+	logger.Trace("This is a trace")
+	logger.Info("This is a info")
+	logger.Warn("This is a warn")
+	logger.Error("This is a error")
 }

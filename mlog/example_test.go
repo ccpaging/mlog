@@ -23,13 +23,13 @@ func ExampleLogger() {
 	// INFO logger: example_test.go:19: Hello, log file!
 }
 
-func ExampleLogger_Debugln() {
+func ExampleLogger_Debug() {
 	var (
 		buf    bytes.Buffer
 		logger = New(&buf, "INFO: ", log.Lshortfile)
 
 		debugln = func(info string) {
-			logger.Debugln(info)
+			logger.Debug(info)
 		}
 	)
 
