@@ -16,7 +16,7 @@ const (
 
 var levelStrings = []string{"DEBG", "TRAC", "INFO", "WARN", "EROR"}
 
-type LogWrapper struct {
+type Logger struct {
 	*LogBundle
 	Printf OutfFunc
 	Debugf OutfFunc
@@ -34,9 +34,9 @@ type LogWrapper struct {
 }
 
 // New creates a new Logger.
-func Wrap(l *stdlog.Logger) *LogWrapper {
+func New(l *stdlog.Logger) *Logger {
 	b := Bundle(l, levelStrings)
-	return &LogWrapper{
+	return &Logger{
 		LogBundle: b,
 
 		Printf: b.Outf2, // defult level function
@@ -56,23 +56,29 @@ func Wrap(l *stdlog.Logger) *LogWrapper {
 }
 
 // New creates a new Logger.
-func (l *LogWrapper) New(prefix string) *LogWrapper {
-	return &LogWrapper{LogBundle: l.LogBundle.New(prefix)}
+func (l *Logger) New(prefix string) *Logger {
+	return &Logger{LogBundle: l.LogBundle.New(prefix)}
 }
 
-var std = Wrap(stdlog.Default())
+var std = New(stdlog.Default())
 
 // Default returns the standard logger used by the package-level output functions.
-func Default() *LogWrapper { return std }
+func Default() *Logger { return std }
 
-var Printf = std.Outf2 // defult level function
+// These functions write to the standard logger.
+
+// Printf calls Output to print to the standard logger.
+// Arguments are handled in the manner of fmt.Printf.
+var Printf = std.Outf2
 var Debugf = std.Outf0
 var Tracef = std.Outf1
 var Infof = std.Outf2
 var Warnf = std.Outf3
 var Errorf = std.Outf4
 
-var Print = std.Out2 // defult level function
+// Print calls Output to print to the standard logger.
+// Arguments are handled in the manner of fmt.Print.
+var Print = std.Out2
 var Debug = std.Out0
 var Trace = std.Out1
 var Info = std.Out2
