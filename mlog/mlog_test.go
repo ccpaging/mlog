@@ -29,7 +29,7 @@ var tests = []tester{
 	{Error, Errorf, "Logger: ", "EROR Logger: hello 23 world"},
 }
 
-// Test using Println("hello", 23, "world") or using Printf("hello %d world", 23)
+// Test using Debug("hello", 23, "world") or using Debugf("hello %d world", 23)
 func testExtPrint(t *testing.T, testcase *tester) {
 	buf := new(bytes.Buffer)
 	std.SetOutput(buf)

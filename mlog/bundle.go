@@ -8,8 +8,13 @@ import (
 	"sync/atomic"
 )
 
+// OutFunc handles the arguments in the manner of fmt.Print.
 type OutFunc func(v ...interface{})
+
+// OutlnFunc handles the arguments in the manner of fmt.Println.
 type OutlnFunc func(v ...interface{})
+
+// OutfFunc handles the arguments in the manner of fmt.Printf.
 type OutfFunc func(format string, v ...interface{})
 
 // A LogBundle represents a bundle of active logging objects.
@@ -23,19 +28,25 @@ type LogBundle struct {
 }
 
 // Bundle creates a new loggers bundle.
+// The levelStrings define how many levels and output string before the prefix of log.
+// For example, if
+// 	leveString = []string{"DEBG ", "TRAC ", "INFO ", "WARN ", "EROR "}
+// then the bundle has 5 levels, and "DEBG " is output before the prefix.
+// The output is:
+//	DEBG 2009/01/23 01:23:23 message
 func Bundle(l *stdlog.Logger, levelStrings []string) *LogBundle {
 	out, prefix, flag := l.Writer(), l.Prefix(), l.Flags()
 	b := &LogBundle{}
 	for _, s := range levelStrings {
 		b.names = append(b.names, s)
-		b.logs = append(b.logs, stdlog.New(out, s+" "+prefix, flag))
+		b.logs = append(b.logs, stdlog.New(out, s+prefix, flag))
 	}
 	b.max = int32(len(levelStrings))
 	b.prefix = prefix
 	return b
 }
 
-// New creates a new duplicate loggers bundle.
+// New creates a new duplicate loggers bundle with new prefix.
 func (b *LogBundle) New(prefix string) *LogBundle {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -52,6 +63,11 @@ func (b *LogBundle) New(prefix string) *LogBundle {
 // SetLevel sets the filter level.
 func (b *LogBundle) SetLevel(level int) {
 	atomic.StoreInt32(&b.level, int32(level))
+}
+
+// Level returns the filter level.
+func (b *LogBundle) Level() int {
+	return int(atomic.LoadInt32(&b.level))
 }
 
 // SetOutput sets the output destination for all loggers.
@@ -113,13 +129,21 @@ func (b *LogBundle) LevelFlags(level int) int {
 }
 
 // SetPrefix sets the output prefix for all loggers.
+// The prefix of every logger is set to level string and prefix.
 func (b *LogBundle) SetPrefix(prefix string) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	for i, l := range b.logs {
-		l.SetPrefix(b.names[i] + " " + prefix)
+		l.SetPrefix(b.names[i] + prefix)
 	}
 	b.prefix = prefix
+}
+
+// Prefix returns the output prefix for loggers bundle.
+func (b *LogBundle) Prefix() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.prefix
 }
 
 // SetLevelPrefix sets the output prefix for the specified logger.
@@ -141,6 +165,8 @@ func (b *LogBundle) LevelPrefix(level int) string {
 	}
 	return b.logs[level].Prefix()
 }
+
+// These functions write to the loggers bundle.
 
 // Out0 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Print.

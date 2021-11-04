@@ -14,10 +14,14 @@ const (
 	Lerror
 )
 
-var levelStrings = []string{"DEBG", "TRAC", "INFO", "WARN", "EROR"}
+var levelStrings = []string{"DEBG ", "TRAC ", "INFO ", "WARN ", "EROR "}
 
-type Logger struct {
-	*LogBundle
+// A LogOutput represents the log output functions.
+// Those functions have three types:
+//	OutFunc func(v ...interface{})
+//	OutlnFunc func(v ...interface{})
+//	OutfFunc func(format string, v ...interface{})
+type LogOutput struct {
 	Printf OutfFunc
 	Debugf OutfFunc
 	Tracef OutfFunc
@@ -33,20 +37,17 @@ type Logger struct {
 	Error OutFunc
 }
 
-// New creates a new Logger.
-func New(l *stdlog.Logger) *Logger {
-	b := Bundle(l, levelStrings)
-	return &Logger{
-		LogBundle: b,
-
-		Printf: b.Outf2, // defult level function
+// New define the real function by the loggers bundle.
+func (*LogOutput) New(b *LogBundle) *LogOutput {
+	return &LogOutput{
+		Printf: b.Outf2, // set as Infof
 		Debugf: b.Outf0,
 		Tracef: b.Outf1,
 		Infof:  b.Outf2,
 		Warnf:  b.Outf3,
 		Errorf: b.Outf4,
 
-		Print: b.Out2, // defult level function
+		Print: b.Out2, // set as Info
 		Debug: b.Out0,
 		Trace: b.Out1,
 		Info:  b.Out2,
@@ -55,9 +56,30 @@ func New(l *stdlog.Logger) *Logger {
 	}
 }
 
+// A Logger is the wrapper of LogBundle and LogOutput.
+type Logger struct {
+	*LogBundle
+	*LogOutput
+}
+
 // New creates a new Logger.
+func New(l *stdlog.Logger) *Logger {
+	b := Bundle(l, levelStrings)
+	o := &LogOutput{}
+	return &Logger{
+		LogBundle: b,
+		LogOutput: o.New(b),
+	}
+}
+
+// New creates a new duplicate logger with new prefix.
 func (l *Logger) New(prefix string) *Logger {
-	return &Logger{LogBundle: l.LogBundle.New(prefix)}
+	b := l.LogBundle.New(prefix)
+	o := &LogOutput{}
+	return &Logger{
+		LogBundle: b,
+		LogOutput: o.New(b),
+	}
 }
 
 var std = New(stdlog.Default())
@@ -69,18 +91,18 @@ func Default() *Logger { return std }
 
 // Printf calls Output to print to the standard logger.
 // Arguments are handled in the manner of fmt.Printf.
-var Printf = std.Outf2
-var Debugf = std.Outf0
-var Tracef = std.Outf1
-var Infof = std.Outf2
-var Warnf = std.Outf3
-var Errorf = std.Outf4
+var Printf = std.Printf
+var Debugf = std.Debugf
+var Tracef = std.Tracef
+var Infof = std.Infof
+var Warnf = std.Warnf
+var Errorf = std.Errorf
 
 // Print calls Output to print to the standard logger.
 // Arguments are handled in the manner of fmt.Print.
-var Print = std.Out2
-var Debug = std.Out0
-var Trace = std.Out1
-var Info = std.Out2
-var Warn = std.Out3
-var Error = std.Out4
+var Print = std.Print
+var Debug = std.Debug
+var Trace = std.Trace
+var Info = std.Info
+var Warn = std.Warn
+var Error = std.Error
