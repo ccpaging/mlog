@@ -3,9 +3,7 @@
 package mlog
 
 import (
-	"io"
 	stdlog "log"
-	"os"
 )
 
 const (
@@ -18,8 +16,8 @@ const (
 
 var levelStrings = []string{"DEBG", "TRAC", "INFO", "WARN", "EROR"}
 
-type Logger struct {
-	*LogBase
+type LogWrapper struct {
+	*LogBundle
 	Printf OutfFunc
 	Debugf OutfFunc
 	Tracef OutfFunc
@@ -36,10 +34,10 @@ type Logger struct {
 }
 
 // New creates a new Logger.
-func New(out io.Writer, prefix string, flag int) *Logger {
-	b := NewLogBase(out, prefix, flag, levelStrings)
-	return &Logger{
-		LogBase: b,
+func Wrap(l *stdlog.Logger) *LogWrapper {
+	b := Bundle(l, levelStrings)
+	return &LogWrapper{
+		LogBundle: b,
 
 		Printf: b.Outf2, // defult level function
 		Debugf: b.Outf0,
@@ -58,14 +56,14 @@ func New(out io.Writer, prefix string, flag int) *Logger {
 }
 
 // New creates a new Logger.
-func (l *Logger) New(prefix string) *Logger {
-	return &Logger{LogBase: l.LogBase.New(prefix)}
+func (l *LogWrapper) New(prefix string) *LogWrapper {
+	return &LogWrapper{LogBundle: l.LogBundle.New(prefix)}
 }
 
-var std = New(os.Stderr, "", stdlog.LstdFlags)
+var std = Wrap(stdlog.Default())
 
 // Default returns the standard logger used by the package-level output functions.
-func Default() *Logger { return std }
+func Default() *LogWrapper { return std }
 
 var Printf = std.Outf2 // defult level function
 var Debugf = std.Outf0

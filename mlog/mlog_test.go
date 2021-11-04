@@ -68,7 +68,7 @@ func TestLevelSetting(t *testing.T) {
 func TestOutput(t *testing.T) {
 	const testString = "test"
 	var b bytes.Buffer
-	l := New(&b, "", 0)
+	l := Wrap(log.New(&b, "", 0))
 	l.Print(testString)
 	if expect := "INFO " + testString + "\n"; b.String() != expect {
 		t.Errorf("log output should match %q is %q", expect, b.String())
@@ -77,7 +77,7 @@ func TestOutput(t *testing.T) {
 
 func TestEmptyPrintCreatesLine(t *testing.T) {
 	var b bytes.Buffer
-	l := New(&b, "Header:", log.LstdFlags)
+	l := Wrap(log.New(&b, "Header:", log.LstdFlags))
 	l.Print()
 	l.Print("non-empty")
 	output := b.String()
@@ -91,7 +91,7 @@ func TestEmptyPrintCreatesLine(t *testing.T) {
 
 func TestLevelRace(t *testing.T) {
 	var b bytes.Buffer
-	l := New(&b, "", 0)
+	l := Wrap(log.New(&b, "", 0))
 	for i := 0; i < 100; i++ {
 		go func() {
 			l.SetFlags(0)
@@ -103,7 +103,7 @@ func TestLevelRace(t *testing.T) {
 func BenchmarkCaller(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
-	l := New(&buf, "", log.LstdFlags|log.Lshortfile)
+	l := Wrap(log.New(&buf, "", log.LstdFlags|log.Lshortfile))
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
 		l.Print(testString)
@@ -113,7 +113,7 @@ func BenchmarkCaller(b *testing.B) {
 func BenchmarkPrintln(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
-	l := New(&buf, "", log.LstdFlags)
+	l := Wrap(log.New(&buf, "", log.LstdFlags))
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
 		l.Print(testString)
@@ -123,7 +123,7 @@ func BenchmarkPrintln(b *testing.B) {
 func BenchmarkPrintlnNoFlags(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
-	l := New(&buf, "", 0)
+	l := Wrap(log.New(&buf, "", 0))
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
 		l.Print(testString)
@@ -133,7 +133,7 @@ func BenchmarkPrintlnNoFlags(b *testing.B) {
 func BenchmarkInfo(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
-	l := New(&buf, "", log.LstdFlags)
+	l := Wrap(log.New(&buf, "", log.LstdFlags))
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
 		l.Info(testString)

@@ -10,10 +10,10 @@ import (
 	"log"
 )
 
-func ExampleLogger() {
+func ExampleLogWrapper() {
 	var (
 		buf    bytes.Buffer
-		logger = New(&buf, "logger: ", log.Lshortfile)
+		logger = Wrap(log.New(&buf, "logger: ", log.Lshortfile))
 	)
 
 	logger.Print("Hello, log file!")
@@ -23,10 +23,10 @@ func ExampleLogger() {
 	// INFO logger: example_test.go:19: Hello, log file!
 }
 
-func ExampleLogger_Debug() {
+func ExampleLogWrapper_Debug() {
 	var (
 		buf    bytes.Buffer
-		logger = New(&buf, "INFO: ", log.Lshortfile)
+		logger = Wrap(log.New(&buf, "INFO: ", log.Lshortfile))
 
 		debugln = func(info string) {
 			logger.Debug(info)
