@@ -27,6 +27,7 @@ var tests = []tester{
 	{Info, Infof, "Logger: ", "INFO Logger: hello 23 world"},
 	{Warn, Warnf, "Logger: ", "WARN Logger: hello 23 world"},
 	{Error, Errorf, "Logger: ", "EROR Logger: hello 23 world"},
+	{std.Out5, std.Outf5, "Logger: ", ""},
 }
 
 // Test using Debug("hello", 23, "world") or using Debugf("hello %d world", 23)
@@ -38,8 +39,10 @@ func testExtPrint(t *testing.T, testcase *tester) {
 	testcase.output("hello ", 23, " world")
 	testcase.outputf("hello %d world", 23)
 	line := buf.String()
-	line = line[0 : len(line)-1]
-	if got, want := line, testcase.expect+"\n"+testcase.expect; got != want {
+	if len(line) == 0 {
+		line += "\n\n"
+	}
+	if got, want := line, testcase.expect+"\n"+testcase.expect+"\n"; got != want {
 		t.Errorf("got %q; want %q", got, want)
 	}
 	std.SetOutput(os.Stderr)
@@ -110,32 +113,52 @@ func BenchmarkCaller(b *testing.B) {
 	}
 }
 
-func BenchmarkPrintln(b *testing.B) {
+func BenchmarkStdlogPrint(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
-	l := New(log.New(&buf, "", log.LstdFlags))
+	l := log.New(&buf, "INFO ", log.LstdFlags)
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
 		l.Print(testString)
 	}
 }
-
-func BenchmarkPrintlnNoFlags(b *testing.B) {
+func BenchmarkBundleOut2(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
-	l := New(log.New(&buf, "", 0))
+	bl := Bundle(log.New(&buf, "", log.LstdFlags), levelStrings)
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
-		l.Print(testString)
+		bl.Out2(testString)
 	}
 }
 
-func BenchmarkInfo(b *testing.B) {
+func BenchmarkLoggerInfo(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
 	l := New(log.New(&buf, "", log.LstdFlags))
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
 		l.Info(testString)
+	}
+}
+
+func BenchmarkInfoNoFlags(b *testing.B) {
+	const testString = "test"
+	var buf bytes.Buffer
+	l := New(log.New(&buf, "", 0))
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		l.Info(testString)
+	}
+}
+
+func BenchmarkDebugDiscard(b *testing.B) {
+	const testString = "test"
+	var buf bytes.Buffer
+	l := New(log.New(&buf, "", 0))
+	l.SetLevel(Linfo)
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		l.Debug(testString)
 	}
 }

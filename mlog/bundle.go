@@ -171,7 +171,7 @@ func (b *LogBundle) LevelPrefix(level int) string {
 // Out0 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Print.
 func (b *LogBundle) Out0(v ...interface{}) {
-	if 0 < atomic.LoadInt32(&b.max) && 0 < atomic.LoadInt32(&b.level) {
+	if 0 < atomic.LoadInt32(&b.level) || 0 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[0].Output(2, fmt.Sprint(v...))
@@ -180,7 +180,7 @@ func (b *LogBundle) Out0(v ...interface{}) {
 // Outf0 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Printf.
 func (b *LogBundle) Outf0(format string, v ...interface{}) {
-	if 0 < atomic.LoadInt32(&b.max) && 0 < atomic.LoadInt32(&b.level) {
+	if 0 < atomic.LoadInt32(&b.level) || 0 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[0].Output(2, fmt.Sprintf(format, v...))
@@ -189,7 +189,7 @@ func (b *LogBundle) Outf0(format string, v ...interface{}) {
 // Outln0 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Println.
 func (b *LogBundle) Outln0(v ...interface{}) {
-	if 0 < atomic.LoadInt32(&b.max) && 0 < atomic.LoadInt32(&b.level) {
+	if 0 < atomic.LoadInt32(&b.level) || 0 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[0].Output(2, fmt.Sprintln(v...))
@@ -198,7 +198,7 @@ func (b *LogBundle) Outln0(v ...interface{}) {
 // Out1 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Print.
 func (b *LogBundle) Out1(v ...interface{}) {
-	if 1 < atomic.LoadInt32(&b.max) && 1 < atomic.LoadInt32(&b.level) {
+	if 1 < atomic.LoadInt32(&b.level) || 1 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[1].Output(2, fmt.Sprint(v...))
@@ -207,7 +207,7 @@ func (b *LogBundle) Out1(v ...interface{}) {
 // Outf1 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Printf.
 func (b *LogBundle) Outf1(format string, v ...interface{}) {
-	if 1 < atomic.LoadInt32(&b.max) && 1 < atomic.LoadInt32(&b.level) {
+	if 1 < atomic.LoadInt32(&b.level) || 1 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[1].Output(2, fmt.Sprintf(format, v...))
@@ -216,7 +216,7 @@ func (b *LogBundle) Outf1(format string, v ...interface{}) {
 // Outln1 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Println.
 func (b *LogBundle) Outln1(v ...interface{}) {
-	if 1 < atomic.LoadInt32(&b.max) && 1 < atomic.LoadInt32(&b.level) {
+	if 1 < atomic.LoadInt32(&b.level) || 1 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[1].Output(2, fmt.Sprintln(v...))
@@ -225,16 +225,17 @@ func (b *LogBundle) Outln1(v ...interface{}) {
 // Out2 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Print.
 func (b *LogBundle) Out2(v ...interface{}) {
-	if 2 < atomic.LoadInt32(&b.max) && 2 < atomic.LoadInt32(&b.level) {
+	if 2 < atomic.LoadInt32(&b.level) || 2 >= atomic.LoadInt32(&b.max) {
 		return
 	}
+
 	b.logs[2].Output(2, fmt.Sprint(v...))
 }
 
 // Outf2 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Printf.
 func (b *LogBundle) Outf2(format string, v ...interface{}) {
-	if 2 < atomic.LoadInt32(&b.max) && 2 < atomic.LoadInt32(&b.level) {
+	if 2 < atomic.LoadInt32(&b.level) || 2 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[2].Output(2, fmt.Sprintf(format, v...))
@@ -243,7 +244,7 @@ func (b *LogBundle) Outf2(format string, v ...interface{}) {
 // Outln2 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Println.
 func (b *LogBundle) Outln2(v ...interface{}) {
-	if 2 < atomic.LoadInt32(&b.max) && 2 < atomic.LoadInt32(&b.level) {
+	if 2 < atomic.LoadInt32(&b.level) || 2 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[2].Output(2, fmt.Sprintln(v...))
@@ -252,7 +253,7 @@ func (b *LogBundle) Outln2(v ...interface{}) {
 // Out3 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Print.
 func (b *LogBundle) Out3(v ...interface{}) {
-	if 3 < atomic.LoadInt32(&b.max) && 3 < atomic.LoadInt32(&b.level) {
+	if 3 < atomic.LoadInt32(&b.level) || 3 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[3].Output(2, fmt.Sprint(v...))
@@ -261,7 +262,7 @@ func (b *LogBundle) Out3(v ...interface{}) {
 // Outf3 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Printf.
 func (b *LogBundle) Outf3(format string, v ...interface{}) {
-	if 3 < atomic.LoadInt32(&b.max) && 3 < atomic.LoadInt32(&b.level) {
+	if 3 < atomic.LoadInt32(&b.level) || 3 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[3].Output(2, fmt.Sprintf(format, v...))
@@ -270,7 +271,7 @@ func (b *LogBundle) Outf3(format string, v ...interface{}) {
 // Outln3 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Println.
 func (b *LogBundle) Outln3(v ...interface{}) {
-	if 3 < atomic.LoadInt32(&b.max) && 3 < atomic.LoadInt32(&b.level) {
+	if 3 < atomic.LoadInt32(&b.level) || 3 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[3].Output(2, fmt.Sprintln(v...))
@@ -279,7 +280,7 @@ func (b *LogBundle) Outln3(v ...interface{}) {
 // Out4 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Print.
 func (b *LogBundle) Out4(v ...interface{}) {
-	if 4 < atomic.LoadInt32(&b.max) && 4 < atomic.LoadInt32(&b.level) {
+	if 4 < atomic.LoadInt32(&b.level) || 4 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[4].Output(2, fmt.Sprint(v...))
@@ -288,16 +289,25 @@ func (b *LogBundle) Out4(v ...interface{}) {
 // Outf4 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Printf.
 func (b *LogBundle) Outf4(format string, v ...interface{}) {
-	if 4 < atomic.LoadInt32(&b.max) && 4 < atomic.LoadInt32(&b.level) {
+	if 4 < atomic.LoadInt32(&b.level) || 4 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[4].Output(2, fmt.Sprintf(format, v...))
 }
 
+// Outln4 calls l.Output to print to the logger.
+// Arguments are handled in the manner of fmt.Println.
+func (b *LogBundle) Outln4(v ...interface{}) {
+	if 4 < atomic.LoadInt32(&b.level) || 4 >= atomic.LoadInt32(&b.max) {
+		return
+	}
+	b.logs[4].Output(2, fmt.Sprintln(v...))
+}
+
 // Out5 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Print.
 func (b *LogBundle) Out5(v ...interface{}) {
-	if 5 < atomic.LoadInt32(&b.max) && 5 < atomic.LoadInt32(&b.level) {
+	if 5 < atomic.LoadInt32(&b.level) || 5 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[5].Output(2, fmt.Sprint(v...))
@@ -306,16 +316,25 @@ func (b *LogBundle) Out5(v ...interface{}) {
 // Outf5 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Printf.
 func (b *LogBundle) Outf5(format string, v ...interface{}) {
-	if 5 < atomic.LoadInt32(&b.max) && 5 < atomic.LoadInt32(&b.level) {
+	if 5 < atomic.LoadInt32(&b.level) || 5 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[5].Output(2, fmt.Sprintf(format, v...))
 }
 
+// Outln5 calls l.Output to print to the logger.
+// Arguments are handled in the manner of fmt.Println.
+func (b *LogBundle) Outln5(v ...interface{}) {
+	if 5 < atomic.LoadInt32(&b.level) || 5 >= atomic.LoadInt32(&b.max) {
+		return
+	}
+	b.logs[5].Output(2, fmt.Sprintln(v...))
+}
+
 // Out6 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Print.
 func (b *LogBundle) Out6(v ...interface{}) {
-	if 6 < atomic.LoadInt32(&b.max) && 6 < atomic.LoadInt32(&b.level) {
+	if 6 < atomic.LoadInt32(&b.level) || 6 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[6].Output(2, fmt.Sprint(v...))
@@ -324,7 +343,7 @@ func (b *LogBundle) Out6(v ...interface{}) {
 // Outf6 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Printf.
 func (b *LogBundle) Outf6(format string, v ...interface{}) {
-	if 6 < atomic.LoadInt32(&b.max) && 6 < atomic.LoadInt32(&b.level) {
+	if 6 < atomic.LoadInt32(&b.level) || 6 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[6].Output(2, fmt.Sprintf(format, v...))
@@ -333,7 +352,7 @@ func (b *LogBundle) Outf6(format string, v ...interface{}) {
 // Outln6 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Println.
 func (b *LogBundle) Outln6(v ...interface{}) {
-	if 6 < atomic.LoadInt32(&b.max) && 6 < atomic.LoadInt32(&b.level) {
+	if 6 < atomic.LoadInt32(&b.level) || 6 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[6].Output(2, fmt.Sprintln(v...))
@@ -342,7 +361,7 @@ func (b *LogBundle) Outln6(v ...interface{}) {
 // Out7 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Print.
 func (b *LogBundle) Out7(v ...interface{}) {
-	if 7 < atomic.LoadInt32(&b.max) && 7 < atomic.LoadInt32(&b.level) {
+	if 7 < atomic.LoadInt32(&b.level) || 7 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[7].Output(2, fmt.Sprint(v...))
@@ -351,7 +370,7 @@ func (b *LogBundle) Out7(v ...interface{}) {
 // Outf7 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Printf.
 func (b *LogBundle) Outf7(format string, v ...interface{}) {
-	if 7 < atomic.LoadInt32(&b.max) && 7 < atomic.LoadInt32(&b.level) {
+	if 7 < atomic.LoadInt32(&b.level) || 7 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[7].Output(2, fmt.Sprintf(format, v...))
@@ -360,7 +379,7 @@ func (b *LogBundle) Outf7(format string, v ...interface{}) {
 // Outln7 calls l.Output to print to the logger.
 // Arguments are handled in the manner of fmt.Println.
 func (b *LogBundle) Outln7(v ...interface{}) {
-	if 7 < atomic.LoadInt32(&b.max) && 7 < atomic.LoadInt32(&b.level) {
+	if 7 < atomic.LoadInt32(&b.level) || 7 >= atomic.LoadInt32(&b.max) {
 		return
 	}
 	b.logs[7].Output(2, fmt.Sprintln(v...))
