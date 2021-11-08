@@ -8,15 +8,6 @@ import (
 	"sync/atomic"
 )
 
-// OutFunc handles the arguments in the manner of fmt.Print.
-type OutFunc func(v ...interface{})
-
-// OutlnFunc handles the arguments in the manner of fmt.Println.
-type OutlnFunc func(v ...interface{})
-
-// OutfFunc handles the arguments in the manner of fmt.Printf.
-type OutfFunc func(format string, v ...interface{})
-
 // A LogBundle represents a bundle of active logging objects.
 type LogBundle struct {
 	mu     sync.Mutex // ensures atomic writes; protects the following fields

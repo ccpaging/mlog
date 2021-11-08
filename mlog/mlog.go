@@ -16,6 +16,15 @@ const (
 
 var levelStrings = []string{"DEBG ", "TRAC ", "INFO ", "WARN ", "EROR "}
 
+// OutFunc handles the arguments in the manner of fmt.Print.
+type OutFunc func(v ...interface{})
+
+// OutlnFunc handles the arguments in the manner of fmt.Println.
+type OutlnFunc func(v ...interface{})
+
+// OutfFunc handles the arguments in the manner of fmt.Printf.
+type OutfFunc func(format string, v ...interface{})
+
 // A LogOutput represents the log output functions.
 // Those functions have three types:
 //	OutFunc func(v ...interface{})
