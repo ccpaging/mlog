@@ -13,10 +13,10 @@ import (
 func ExampleLogger() {
 	var (
 		buf    bytes.Buffer
-		logger = New(log.New(&buf, "logger: ", log.Lshortfile))
+		logger = New("logger: ").SetOutput(log.New(&buf, "logger: ", log.Lshortfile))
 	)
 
-	logger.Print("Hello, log file!")
+	logger.Info("Hello, log file!")
 
 	fmt.Print(&buf)
 	// Output:
@@ -26,7 +26,7 @@ func ExampleLogger() {
 func ExampleLogger_Debug() {
 	var (
 		buf    bytes.Buffer
-		logger = New(log.New(&buf, "INFO: ", log.Lshortfile))
+		logger = New("INFO: ").SetOutput(log.New(&buf, "INFO: ", log.Lshortfile))
 
 		debugln = func(info string) {
 			logger.Debug(info)
