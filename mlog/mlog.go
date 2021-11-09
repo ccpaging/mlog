@@ -22,14 +22,10 @@ func New(prefix string) *Logger {
 }
 
 func (l *Logger) SetOutput(root *stdlog.Logger) *Logger {
-	if l.Lmap == nil {
-		l.Lmap = make(map[string]*stdlog.Logger)
-	}
-	w, flag := root.Writer(), root.Flags()
-	l.Lmap[Ldebug] = stdlog.New(w, Ldebug+l.Prefix, flag)
-	l.Lmap[Ltrace] = stdlog.New(w, Ltrace+l.Prefix, flag)
-	l.Lmap[Linfo] = stdlog.New(w, Linfo+l.Prefix, flag)
-	l.Lmap[Lwarn] = stdlog.New(w, Lwarn+l.Prefix, flag)
+	l.Add(Ldebug, root)
+	l.Add(Ltrace, root)
+	l.Add(Linfo, root)
+	l.Warn(Lwarn, root)
 	return l
 }
 

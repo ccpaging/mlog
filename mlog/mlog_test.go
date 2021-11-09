@@ -53,3 +53,19 @@ func BenchmarkInfo(b *testing.B) {
 	}
 	b.StopTimer()
 }
+
+func BenchmarkInfoPtr(b *testing.B) {
+	const testString = "test"
+	var buf bytes.Buffer
+
+	l := &Logger{}
+	l.Add(Linfo, stdlog.New(&buf, "", stdlog.LstdFlags))
+	info := l.Info
+
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		info(testString)
+	}
+	b.StopTimer()
+}
