@@ -26,7 +26,7 @@ func ExampleLogger() {
 func ExampleLogger_Debug() {
 	var (
 		buf    bytes.Buffer
-		logger = New("INFO: ").SetOutput(log.New(&buf, "INFO: ", log.Lshortfile))
+		logger = New("main: ").SetOutput(log.New(&buf, "", log.Lshortfile))
 
 		debugln = func(info string) {
 			logger.Debug(info)
@@ -37,5 +37,18 @@ func ExampleLogger_Debug() {
 
 	fmt.Print(&buf)
 	// Output:
-	// DEBG INFO: example_test.go:32: Hello world
+	// DEBG main: example_test.go:32: Hello world
+}
+
+func ExampleLogger_Info() {
+	var (
+		buf    bytes.Buffer
+		logger = New("main: ").SetOutput(log.New(&buf, "", log.Lmsgprefix))
+	)
+
+	logger.Info("Hello world")
+
+	fmt.Print(&buf)
+	// Output:
+	// INFO main: Hello world
 }

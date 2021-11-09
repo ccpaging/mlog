@@ -42,6 +42,11 @@ func (l *Logger) Remove(name string) {
 	delete(l.Lmap, name)
 }
 
+func (l *Logger) Get(name string) (ll *stdlog.Logger, ok bool) {
+	ll, ok = l.Lmap[name]
+	return
+}
+
 func (l *Logger) New(prefix string) *Logger {
 	nl := &Logger{Prefix: prefix}
 	if l.Lmap == nil {
@@ -54,49 +59,49 @@ func (l *Logger) New(prefix string) *Logger {
 }
 
 func (l *Logger) Debug(v ...interface{}) {
-	if ll, ok := l.Lmap[Ldebug]; ok {
+	if ll, ok := l.Get(Ldebug); ok {
 		ll.Output(2, fmt.Sprint(v...))
 	}
 }
 
 func (l *Logger) Trace(v ...interface{}) {
-	if ll, ok := l.Lmap[Ltrace]; ok {
+	if ll, ok := l.Get(Ltrace); ok {
 		ll.Output(2, fmt.Sprint(v...))
 	}
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	if ll, ok := l.Lmap[Linfo]; ok {
+	if ll, ok := l.Get(Linfo); ok {
 		ll.Output(2, fmt.Sprint(v...))
 	}
 }
 
 func (l *Logger) Warn(v ...interface{}) {
-	if ll, ok := l.Lmap[Lwarn]; ok {
+	if ll, ok := l.Get(Lwarn); ok {
 		ll.Output(2, fmt.Sprint(v...))
 	}
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	if ll, ok := l.Lmap[Ldebug]; ok {
+	if ll, ok := l.Get(Ldebug); ok {
 		ll.Output(2, fmt.Sprintf(format, v...))
 	}
 }
 
 func (l *Logger) Tracef(format string, v ...interface{}) {
-	if ll, ok := l.Lmap[Ltrace]; ok {
+	if ll, ok := l.Get(Ltrace); ok {
 		ll.Output(2, fmt.Sprintf(format, v...))
 	}
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
-	if ll, ok := l.Lmap[Linfo]; ok {
+	if ll, ok := l.Get(Linfo); ok {
 		ll.Output(2, fmt.Sprintf(format, v...))
 	}
 }
 
 func (l *Logger) Warnf(format string, v ...interface{}) {
-	if ll, ok := l.Lmap[Lwarn]; ok {
+	if ll, ok := l.Get(Lwarn); ok {
 		ll.Output(2, fmt.Sprintf(format, v...))
 	}
 }
