@@ -13,19 +13,20 @@ type tester struct {
 	expect  string
 }
 
+var testLogger = Default().New("")
+
 var tests = []tester{
-	{Debug, Debugf, "Logger: ", "Logger: DEBUG hello 23 world"},
-	{Info, Infof, "Logger: ", "Logger: INFO  hello 23 world"},
-	{Warn, Warnf, "Logger: ", "Logger: WARN  hello 23 world"},
-	{Error, Errorf, "Logger: ", "Logger: ERROR hello 23 world"},
+	{testLogger.Debugln, testLogger.Debugf, "Logger: ", "Logger: DEBG hello 23 world"},
+	{testLogger.Infoln, testLogger.Infof, "Logger: ", "Logger: INFO hello 23 world"},
+	{testLogger.Warnln, testLogger.Warnf, "Logger: ", "Logger: WARN hello 23 world"},
 }
 
 // Test using Println("hello", 23, "world") or using Printf("hello %d world", 23)
 func testExtPrint(t *testing.T, testcase *tester) {
 	buf := new(bytes.Buffer)
-	SetOutput(buf)
-	SetFlags(0)
-	SetPrefix(testcase.prefix)
+	testLogger.SetOutput(buf)
+	testLogger.SetFlags(0)
+	testLogger.SetPrefix(testcase.prefix)
 	testcase.output("hello", 23, "world")
 	testcase.outputf("hello %d world", 23)
 	line := buf.String()
@@ -33,7 +34,7 @@ func testExtPrint(t *testing.T, testcase *tester) {
 	if got, want := line, testcase.expect+"\n"+testcase.expect; got != want {
 		t.Errorf("got %q; want %q", got, want)
 	}
-	SetOutput(os.Stderr)
+	testLogger.SetOutput(os.Stderr)
 }
 
 func TestExtAll(t *testing.T) {
@@ -44,24 +45,24 @@ func TestExtAll(t *testing.T) {
 
 func TestLevelSetting(t *testing.T) {
 	buf := new(bytes.Buffer)
-	SetOutput(buf)
-	level := int(std.level)
+	testLogger.SetOutput(buf)
+	level := int(testLogger.level)
 	if level != 0 {
 		t.Errorf(`Level: expected %d got %d`, 0, level)
 	}
-	SetFlags(Flags() | Linfo)
-	level = int(std.level)
+	testLogger.SetFlags(testLogger.Flags() | Linfo)
+	level = int(testLogger.level)
 	if level != Linfo {
 		t.Errorf(`Prefix: expected %d got %d`, Linfo, level)
 	}
-	SetPrefix("Reality:")
+	testLogger.SetPrefix("Reality:")
 	// Verify a log message looks right, with our prefix and microseconds present.
-	Debug("hello")
-	Info("hello")
+	testLogger.Debug("hello")
+	testLogger.Info("hello")
 	if expect := "Reality:"; buf.String()[0:len(expect)] != expect {
 		t.Errorf("log output should match %q is %q", expect, buf.String()[0:len(expect)])
 	}
-	SetOutput(os.Stderr)
+	testLogger.SetOutput(os.Stderr)
 }
 
 func TestLevelRace(t *testing.T) {

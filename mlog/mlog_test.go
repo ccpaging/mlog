@@ -24,7 +24,7 @@ func TestOutput(t *testing.T) {
 	var b bytes.Buffer
 	l := New(&b, "", 0)
 	l.Println(testString)
-	if expect := "INFO  " + testString + "\n"; b.String() != expect {
+	if expect := "INFO " + testString + "\n"; b.String() != expect {
 		t.Errorf("log output should match %q is %q", expect, b.String())
 	}
 }
@@ -82,20 +82,20 @@ func TestEmptyPrintCreatesLine(t *testing.T) {
 	}
 }
 
-func BenchmarkPrintln(b *testing.B) {
+func BenchmarkStdPrintln(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
-	l := New(&buf, "", log.LstdFlags)
+	l := log.New(&buf, "INFO ", log.LstdFlags)
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
 		l.Println(testString)
 	}
 }
 
-func BenchmarkPrintlnNoFlags(b *testing.B) {
+func BenchmarkPrintln(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
-	l := New(&buf, "", 0)
+	l := New(&buf, "", log.LstdFlags)
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
 		l.Println(testString)

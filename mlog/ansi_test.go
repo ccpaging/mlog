@@ -4,6 +4,7 @@ package mlog
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -24,13 +25,15 @@ type ansiTermWriter struct {
 
 func (t *ansiTermWriter) Write(b []byte) (n int, err error) {
 	var cb []byte
-	switch {
-	case bytes.Contains(b, []byte("DEBUG")):
-		cb = colorDebug
-	case bytes.Contains(b, []byte("WARN ")):
-		cb = colorWarn
-	case bytes.Contains(b, []byte("ERROR")):
-		cb = colorError
+	if len(b) > 14 {
+		switch b[14] {
+		case 'D':
+			cb = colorDebug
+		case 'W':
+			cb = colorWarn
+		case 'E':
+			cb = colorError
+		}
 	}
 	if len(cb) == 0 {
 		return t.w.Write(b)
@@ -45,10 +48,10 @@ func (t *ansiTermWriter) Write(b []byte) (n int, err error) {
 
 func TestAnsiTerm(t *testing.T) {
 	w := &ansiTermWriter{w: os.Stdout}
-	logger := New(w, "", log.Lshortfile)
+	logger := New(w, "main ", log.Ltime|log.Lmsgprefix)
 
 	logger.Debug("This is a debug")
 	logger.Info("This is a info")
 	logger.Warn("This is a warn")
-	logger.Error("This is a error")
+	logger.Error(errors.New(""), "This is a error")
 }

@@ -6,6 +6,7 @@ package mlog
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 )
@@ -20,22 +21,31 @@ func ExampleLogger() {
 
 	fmt.Print(&buf)
 	// Output:
-	// logger: example_test.go:19: INFO  Hello, log file!
+	// logger: example_test.go:20: INFO Hello, log file!
 }
 
-func ExampleLogger_Output() {
+func ExampleLogger_Info() {
 	var (
 		buf    bytes.Buffer
-		logger = New(&buf, "INFO: ", log.Lshortfile)
-
-		info = func(info string) {
-			logger.Output(2, info)
-		}
+		logger = New(&buf, "", log.Lshortfile)
 	)
 
-	info("Hello world")
+	logger.Info("Hello world")
 
 	fmt.Print(&buf)
 	// Output:
-	// INFO: example_test.go:36: Hello world
+	// example_test.go:33: INFO Hello world
+}
+
+func ExampleLogger_Error() {
+	var (
+		buf    bytes.Buffer
+		logger = New(&buf, "", log.Lshortfile)
+	)
+
+	logger.Error(errors.New("Error message."), "Hello world")
+
+	fmt.Print(&buf)
+	// Output:
+	// example_test.go:46: EROR Error message. Hello world
 }
