@@ -49,3 +49,16 @@ func ExampleLogger_Error() {
 	// Output:
 	// example_test.go:46: EROR Error message. Hello world
 }
+
+func ExampleLogger_New() {
+	var (
+		buf    bytes.Buffer
+		logger = New(&buf, "logger: ", log.Lshortfile).New("new: ")
+	)
+
+	logger.Print("Hello, log file!")
+
+	fmt.Print(&buf)
+	// Output:
+	// new: example_test.go:59: INFO Hello, log file!
+}

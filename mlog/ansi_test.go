@@ -53,5 +53,5 @@ func TestAnsiTerm(t *testing.T) {
 	logger.Debug("This is a debug")
 	logger.Info("This is a info")
 	logger.Warn("This is a warn")
-	logger.Error(errors.New(""), "This is a error")
+	logger.Error(errors.New("This is a error"))
 }

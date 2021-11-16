@@ -15,19 +15,18 @@ const levelMask = 0x0f00
 
 // These are the integer logging levels used by the logger
 const (
-	Ldebug int = (1 + iota) << 8
-	Ltrace
+	_ int = (1 + iota) << 8
+	Ldebug
+	_
 	Linfo
 	_
 	Lwarn
 	Lerror
 	_
-	_
 )
 
 var LevelStrings map[int]string = map[int]string{
 	Ldebug: "DEBG ",
-	Ltrace: "TRAC ",
 	Linfo:  "INFO ",
 	Lwarn:  "WARN ",
 	Lerror: "EROR ",
@@ -60,6 +59,10 @@ func (l Logger) New(prefix string) *Logger {
 		Logger: stdlog.New(l.Writer(), prefix, l.Flags()),
 		level:  l.level,
 	}
+}
+
+func (l Logger) Exit(n int) {
+	os.Exit(n)
 }
 
 // Print calls l.Output to print to the logger.
@@ -195,6 +198,24 @@ func (l Logger) Errorln(err error, v ...interface{}) {
 		return
 	}
 	l.Output(2, LevelStrings[Lerror]+err.Error()+" "+fmt.Sprintln(v...))
+}
+
+// Fatal is equivalent to l.Print() followed by a call to os.Exit(1).
+func (l *Logger) Fatal(v ...interface{}) {
+	l.Output(2, "FATAL "+fmt.Sprint(v...))
+	l.Exit(1)
+}
+
+// Fatalf is equivalent to l.Printf() followed by a call to os.Exit(1).
+func (l *Logger) Fatalf(format string, v ...interface{}) {
+	l.Output(2, "FATAL "+fmt.Sprintf(format, v...))
+	l.Exit(1)
+}
+
+// Fatalln is equivalent to l.Println() followed by a call to os.Exit(1).
+func (l *Logger) Fatalln(v ...interface{}) {
+	l.Output(2, "FATAL "+fmt.Sprintln(v...))
+	l.Exit(1)
 }
 
 // Global Logger and functions
