@@ -43,7 +43,7 @@ func ExampleLogger_Error() {
 		logger = New(&buf, "", log.Lshortfile)
 	)
 
-	logger.Error(errors.New("Error message."), "Hello world")
+	logger.Error(errors.New("Error message."), " Hello world")
 
 	fmt.Print(&buf)
 	// Output:

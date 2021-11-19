@@ -82,22 +82,22 @@ func TestEmptyPrintCreatesLine(t *testing.T) {
 	}
 }
 
-func BenchmarkStdPrintln(b *testing.B) {
+func BenchmarkStdPrint(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
 	l := log.New(&buf, "INFO ", log.LstdFlags)
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
-		l.Println(testString)
+		l.Print(testString)
 	}
 }
 
-func BenchmarkPrintln(b *testing.B) {
+func BenchmarkPrint(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
 	l := New(&buf, "", log.LstdFlags)
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
-		l.Println(testString)
+		l.Print(testString)
 	}
 }

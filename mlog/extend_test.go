@@ -16,9 +16,9 @@ type tester struct {
 var testLogger = Default().New("")
 
 var tests = []tester{
-	{testLogger.Debugln, testLogger.Debugf, "Logger: ", "Logger: DEBG hello 23 world"},
-	{testLogger.Infoln, testLogger.Infof, "Logger: ", "Logger: INFO hello 23 world"},
-	{testLogger.Warnln, testLogger.Warnf, "Logger: ", "Logger: WARN hello 23 world"},
+	{testLogger.Debug, testLogger.Debugf, "Logger: ", "Logger: DEBG hello 23 world"},
+	{testLogger.Info, testLogger.Infof, "Logger: ", "Logger: INFO hello 23 world"},
+	{testLogger.Warn, testLogger.Warnf, "Logger: ", "Logger: WARN hello 23 world"},
 }
 
 // Test using Println("hello", 23, "world") or using Printf("hello %d world", 23)
@@ -27,7 +27,7 @@ func testExtPrint(t *testing.T, testcase *tester) {
 	testLogger.SetOutput(buf)
 	testLogger.SetFlags(0)
 	testLogger.SetPrefix(testcase.prefix)
-	testcase.output("hello", 23, "world")
+	testcase.output("hello ", 23, " world")
 	testcase.outputf("hello %d world", 23)
 	line := buf.String()
 	line = line[0 : len(line)-1]
