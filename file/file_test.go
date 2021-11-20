@@ -18,7 +18,6 @@ func TestWriter(t *testing.T) {
 	testFile := testFiles[0]
 
 	f, _ := Open(testFile)
-	f.SetLimitSize(5 * 1024)
 	defer os.Remove(testFile)
 
 	f.Write([]byte(testString))
@@ -34,8 +33,7 @@ func TestWriter(t *testing.T) {
 }
 
 func TestRolling(t *testing.T) {
-	f, _ := Open(testFiles[0])
-	f.SetLimitSize(5 * 1024)
+	f, _ := OpenFile(testFiles[0], 5*1024, 1)
 
 	for j := 0; j < 15; j++ {
 		for i := 0; i < 200/(j+1); i++ {
@@ -60,7 +58,7 @@ func TestRolling(t *testing.T) {
 
 func BenchmarkNoBuffer(b *testing.B) {
 	f, _ := Open(benchLogFiles[0])
-	f.SetBufferSize(0)
+	f.Buffersize = 0
 	defer func() {
 		f.Close()
 		os.Remove(benchLogFiles[0])

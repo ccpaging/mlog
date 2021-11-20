@@ -35,11 +35,10 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"sync"
 )
 
 var (
-	FileFlag = os.O_WRONLY | os.O_APPEND | os.O_CREATE
+	DefaultFileFlag = os.O_WRONLY | os.O_APPEND | os.O_CREATE
 
 	// permission to:  owner      group      other
 	//                 /```\      /```\      /```\
@@ -51,87 +50,62 @@ var (
 	// permission to  - owner: the user that create the file/folder
 	//                  group: the users from group that owner is member
 	//                  other: all other users
-	FileMode = os.FileMode(0660)
+	DefaultFileMode = os.FileMode(0660)
+
+	DefaultLimitSize int64 = 1024 * 1024
+
+	DefaultBufferSize = 2 * os.Getpagesize()
 )
 
 // File represents the buffered writer, and rolling up automatic.
 type File struct {
-	mu sync.RWMutex
-
-	name  string
-	perm  os.FileMode
-	limit int64
-	back  int
+	FilePath    string
+	FileMode    os.FileMode
+	LimitSize   int64
+	BackupFiles int
 
 	file *os.File
 	size int64
 
-	bufWriter *bufio.Writer
-	bufSize   int
+	bufWriter  *bufio.Writer
+	Buffersize int
 }
 
 // Open opens the named file for writing. If successful, methods on
 // the returned file can be used for writing; the associated file
 // descriptor has mode os.O_WRONLY|os.O_APPEND|os.O_CREATE.
 // If there is an error, it will be of type *PathError.
-func Open(name string) (*File, error) {
-	return OpenFile(name, FileMode)
+func Open(filePath string) (*File, error) {
+	return OpenFile(filePath, DefaultLimitSize, 1)
 }
 
 // OpenFile is the generalized open call; most users will use Open
 // instead. It is created with mode perm (before umask) if necessary.
 // If successful, methods on the returned File can be used for io.Writer.
-func OpenFile(name string, perm os.FileMode) (*File, error) {
-	path := filepath.Dir(name)
+func OpenFile(filePath string, limitSize int64, backupFiles int) (*File, error) {
+	path := filepath.Dir(filePath)
 	if stat, err := os.Stat(path); err != nil {
 		return nil, err
 	} else if !stat.IsDir() {
-		return nil, errors.New("path " + name + ": is not a directory")
+		return nil, errors.New("Error: The file path " + filePath + ": is not a directory.")
+	}
+
+	if limitSize <= 0 {
+		limitSize = DefaultLimitSize
+	}
+	if backupFiles < 0 {
+		backupFiles = 1
 	}
 
 	f := &File{
-		name:    name,
-		perm:    perm,
-		limit:   1024 * 1024,
-		back:    1,
-		bufSize: 2 * os.Getpagesize(),
+		FilePath:    filePath,
+		FileMode:    DefaultFileMode,
+		LimitSize:   limitSize,
+		BackupFiles: backupFiles,
+		Buffersize:  DefaultBufferSize,
 	}
 	f.size = f.fileSize()
 	return f, nil
-}
-
-// SetBufferSize sets bufio writer size. It take effect when next internal
-// open/create file.
-//
-// If size = 0, not using bufio. The default is 2 * os.Getpagesize()
-func (f *File) SetBufferSize(size int) *File {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
-	f.bufSize = size
-	return f
-}
-
-// SetLimitSize sets file limit size.
-//
-// The default is 1024 * 1024.
-func (f *File) SetLimitSize(size int64) *File {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
-	f.limit = size
-	return f
-}
-
-// SetBackup sets backup file count.
-//
-// If n = 0, no backup file is reserved. The default is 1.
-func (f *File) SetBackup(n int) *File {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
-	f.back = n
-	return f
 }
 
 func (f *File) close() (err error) {
@@ -151,9 +125,6 @@ func (f *File) close() (err error) {
 
 // Close active buffered writer.
 func (f *File) Close() error {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
 	return f.close()
 }
 
@@ -161,15 +132,15 @@ func (f *File) open() error {
 	if f.file != nil {
 		return nil
 	}
-	file, err := os.OpenFile(f.name, FileFlag, f.perm)
+	file, err := os.OpenFile(f.FilePath, DefaultFileFlag, f.FileMode)
 	if err != nil {
 		return err
 	}
 
 	f.file = file
 	f.bufWriter = nil
-	if f.bufSize > 0 {
-		f.bufWriter = bufio.NewWriterSize(f.file, f.bufSize)
+	if f.Buffersize > 0 {
+		f.bufWriter = bufio.NewWriterSize(f.file, f.Buffersize)
 	}
 
 	f.size = 0
@@ -194,11 +165,8 @@ func (f *File) write(b []byte) (n int, err error) {
 
 // Write bytes to file, and rolling up automatic.
 func (f *File) Write(b []byte) (n int, err error) {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
-	if f.limit > 0 && f.size > f.limit {
-		f.rolling(f.back)
+	if f.LimitSize > 0 && f.size > f.LimitSize {
+		f.rolling(f.BackupFiles)
 	}
 
 	if err := f.open(); err != nil {
@@ -213,12 +181,12 @@ func (f *File) rolling(n int) {
 
 	if n < 1 {
 		// no backup file
-		os.Remove(f.name)
+		os.Remove(f.FilePath)
 		return
 	}
 
-	ext := filepath.Ext(f.name)              // save extension like ".log"
-	name := f.name[0 : len(f.name)-len(ext)] // dir and name
+	ext := filepath.Ext(f.FilePath)                  // save extension like ".log"
+	name := f.FilePath[0 : len(f.FilePath)-len(ext)] // dir and name
 
 	var (
 		i    int
@@ -246,16 +214,7 @@ func (f *File) rolling(n int) {
 		slot = prev
 	}
 
-	os.Rename(f.name, name+".1"+ext)
-}
-
-// Rolling file to "name.0.ext", "name.1.ext", ... until "name.[num - 1].ext".
-// Notice: The file is removed if num < 1.
-func (f *File) Rolling(num int) {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
-	f.rolling(num)
+	os.Rename(f.FilePath, name+".1"+ext)
 }
 
 func (f *File) flush() {
@@ -268,41 +227,13 @@ func (f *File) flush() {
 	}
 }
 
-// Flush to file.
-func (f *File) Flush() {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
-	f.flush()
-}
-
-// Stat returns a FileInfo describing the named file.
-// If there is an error, it will be of type *PathError.
-func (f *File) Stat() (os.FileInfo, error) {
-	f.mu.RLock()
-	defer f.mu.RUnlock()
-
-	if f.file != nil {
-		return f.file.Stat()
-	}
-	return os.Stat(f.name)
-}
-
 func (f *File) fileSize() int64 {
 	if f.file != nil {
 		return f.size
 	}
-	fi, err := os.Stat(f.name)
+	fi, err := os.Stat(f.FilePath)
 	if err != nil {
 		return f.size
 	}
 	return fi.Size()
-}
-
-// Size returns the size of file.
-func (f *File) Size() int64 {
-	f.mu.RLock()
-	defer f.mu.RUnlock()
-
-	return f.fileSize()
 }
