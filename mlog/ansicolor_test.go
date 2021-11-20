@@ -27,26 +27,29 @@ type ansiTermWriter struct {
 }
 
 func (t *ansiTermWriter) Write(b []byte) (n int, err error) {
+	n = len(b)
 	var cb []byte
-	if len(b) > 0 {
+	if n > 0 {
 		level := bytes.IndexByte([]byte("DTIWE"), b[0])
 		if level >= 0 {
 			cb = colors[level]
 		}
 	}
 	if len(cb) == 0 {
-		return t.w.Write(b)
+		_, err = t.w.Write(b)
+		return
 	}
 	var bb []byte
 	bb = append(bb, cb...)
 	bb = append(bb, bytes.Trim(b, "\r\n")...)
 	bb = append(bb, colorReset...)
 	bb = append(bb, '\n')
-	return t.w.Write(bb)
+	_, err = t.w.Write(bb)
+	return
 }
 
 func TestAnsiTerm(t *testing.T) {
-	logger := NewLogger("", log.New(&ansiTermWriter{w: os.Stdout}, "", log.Lshortfile))
+	logger := NewLogger("", log.New(&ansiTermWriter{w: os.Stdout}, "", log.Lshortfile), nil)
 	logger.Debug("This is a debug")
 	logger.Trace("This is a trace")
 	logger.Info("This is a info")

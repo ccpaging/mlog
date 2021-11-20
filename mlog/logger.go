@@ -2,71 +2,85 @@ package mlog
 
 import (
 	"fmt"
-	"log"
-	"sync"
+	stdlog "log"
 )
 
 var (
-	Ldebug = "DEBG "
-	Ltrace = "TRAC "
-	Linfo  = "INFO "
-	Lwarn  = "WARN "
+	Ldebug string = "DEBG "
+	Ltrace string = "TRAC "
+	Linfo  string = "INFO "
+	Lwarn  string = "WARN "
+	Lerror string = "EROR "
 )
 
 type Logger struct {
-	mu sync.RWMutex
-	ml *MultiLogger
+	Name string
+	Lmap map[string]*stdlog.Logger
 }
 
-func NewLogger(prefix string, root *log.Logger) *Logger {
-	ml := New(prefix)
-	ml.Set(Ldebug, root)
-	ml.Set(Ltrace, root)
-	ml.Set(Linfo, root)
-	ml.Set(Lwarn, root)
-	return &Logger{ml: ml}
+func NewLogger(name string, root *stdlog.Logger, levelStrings []string) *Logger {
+	if root == nil {
+		root = stdlog.Default()
+	}
+	if levelStrings == nil {
+		levelStrings = []string{Ldebug, Ltrace, Linfo, Lwarn, Lerror}
+	}
+
+	w, flag := root.Writer(), root.Flags()
+	l := &Logger{
+		Name: name,
+		Lmap: make(map[string]*stdlog.Logger),
+	}
+	for _, level := range levelStrings {
+		l.Lmap[level] = stdlog.New(w, l.Name+level, flag)
+	}
+	return l
 }
 
-func (l *Logger) New(prefix string) *Logger {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	return &Logger{ml: l.ml.New(prefix)}
+func (l Logger) New(name string) *Logger {
+	o := &Logger{
+		Name: name,
+		Lmap: make(map[string]*stdlog.Logger),
+	}
+	for level, ll := range l.Lmap {
+		w, flag := ll.Writer(), ll.Flags()
+		o.Lmap[level] = stdlog.New(w, l.Name+level, flag)
+	}
+	return o
 }
 
 func (l *Logger) Debug(v ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if ll, ok := l.ml.Get(Ldebug); ok {
+	if ll, ok := l.Lmap[Ldebug]; ok {
 		ll.Output(2, fmt.Sprint(v...))
 	}
 }
 
 func (l *Logger) Trace(v ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if ll, ok := l.ml.Get(Ltrace); ok {
+	if ll, ok := l.Lmap[Ltrace]; ok {
 		ll.Output(2, fmt.Sprint(v...))
 	}
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if ll, ok := l.ml.Get(Linfo); ok {
+	if ll, ok := l.Lmap[Linfo]; ok {
 		ll.Output(2, fmt.Sprint(v...))
 	}
 }
 
 func (l *Logger) Warn(v ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if ll, ok := l.ml.Get(Lwarn); ok {
+	if ll, ok := l.Lmap[Lwarn]; ok {
+		ll.Output(2, fmt.Sprint(v...))
+	}
+}
+
+func (l *Logger) Error(v ...interface{}) {
+	if ll, ok := l.Lmap[Lerror]; ok {
 		ll.Output(2, fmt.Sprint(v...))
 	}
 }
 
 var (
-	std   = NewLogger("", log.Default())
+	std   = NewLogger("", nil, nil)
 	Debug = std.Debug
 	Trace = std.Trace
 	Info  = std.Info

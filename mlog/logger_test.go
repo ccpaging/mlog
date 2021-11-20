@@ -8,7 +8,7 @@ import (
 
 func TestLoggerInfo(t *testing.T) {
 	// Setup Logger
-	l := NewLogger("main: ", stdlog.Default())
+	l := NewLogger("main: ", nil, nil)
 	l.Info("Hello, world!")
 
 	// New Logger
@@ -40,7 +40,7 @@ func BenchmarkInfo(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
 
-	l := NewLogger("", stdlog.New(&buf, "", stdlog.LstdFlags))
+	l := NewLogger("", stdlog.New(&buf, "", stdlog.LstdFlags), nil)
 
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -54,7 +54,7 @@ func BenchmarkInfoPtr(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
 
-	l := NewLogger("", stdlog.New(&buf, "", stdlog.LstdFlags))
+	l := NewLogger("", stdlog.New(&buf, "", stdlog.LstdFlags), nil)
 	info := l.Info
 
 	b.StartTimer()
