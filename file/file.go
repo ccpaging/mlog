@@ -27,7 +27,7 @@
 //	fmt.Printf("read %d bytes: %q\n", count, data[:count])
 //
 
-package mlog
+package file
 
 import (
 	"bufio"

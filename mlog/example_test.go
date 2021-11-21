@@ -20,7 +20,7 @@ func ExampleLogger() {
 
 	fmt.Print(&buf)
 	// Output:
-	// logger: INFO example_test.go:19: Hello, log file!
+	// INFO logger: example_test.go:19: Hello, log file!
 }
 
 func ExampleLogger_Debug() {
@@ -37,7 +37,7 @@ func ExampleLogger_Debug() {
 
 	fmt.Print(&buf)
 	// Output:
-	// main: DEBG example_test.go:32: Hello world
+	// DEBG main: example_test.go:32: Hello world
 }
 
 func ExampleLogger_Info() {
@@ -50,5 +50,5 @@ func ExampleLogger_Info() {
 
 	fmt.Print(&buf)
 	// Output:
-	// main: INFO Hello world
+	// INFO main: Hello world
 }

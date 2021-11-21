@@ -18,11 +18,15 @@ type Logger struct {
 	Lmap map[string]*stdlog.Logger
 }
 
+func New(name string) *Logger {
+	return NewLogger(name, nil, nil)
+}
+
 func NewLogger(name string, root *stdlog.Logger, levelStrings []string) *Logger {
 	if root == nil {
 		root = stdlog.Default()
 	}
-	if levelStrings == nil {
+	if len(levelStrings) == 0 {
 		levelStrings = []string{Ldebug, Ltrace, Linfo, Lwarn, Lerror}
 	}
 
@@ -32,7 +36,7 @@ func NewLogger(name string, root *stdlog.Logger, levelStrings []string) *Logger 
 		Lmap: make(map[string]*stdlog.Logger),
 	}
 	for _, level := range levelStrings {
-		l.Lmap[level] = stdlog.New(w, l.Name+level, flag)
+		l.Lmap[level] = stdlog.New(w, level+l.Name, flag)
 	}
 	return l
 }
@@ -44,7 +48,7 @@ func (l Logger) New(name string) *Logger {
 	}
 	for level, ll := range l.Lmap {
 		w, flag := ll.Writer(), ll.Flags()
-		o.Lmap[level] = stdlog.New(w, l.Name+level, flag)
+		o.Lmap[level] = stdlog.New(w, level+o.Name, flag)
 	}
 	return o
 }
