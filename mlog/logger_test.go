@@ -6,21 +6,58 @@ import (
 	"testing"
 )
 
+func TestAll(t *testing.T) {
+	type tester struct {
+		output func(v ...interface{})
+		prefix string
+		expect string
+	}
+
+	var buf bytes.Buffer
+	testlog := NewLogger("Logger: ", stdlog.New(&buf, "", 0), nil)
+
+	var tests = []tester{
+		{testlog.Debug, "Logger: ", "DEBG Logger: hello 23 world\n"},
+		{testlog.Info, "Logger: ", "INFO Logger: hello 23 world\n"},
+		{testlog.Warn, "Logger: ", "WARN Logger: hello 23 world\n"},
+	}
+
+	for _, testcase := range tests {
+		buf.Reset()
+		testcase.output("hello ", 23, " world")
+		if got, want := buf.String(), testcase.expect; got != want {
+			t.Errorf("got %q; want %q", got, want)
+		}
+	}
+}
+
 func TestLoggerInfo(t *testing.T) {
 	// Setup Logger
-	l := NewLogger("main: ", nil, nil)
+	var buf bytes.Buffer
+	l := NewLogger("main: ", stdlog.New(&buf, "", 0), nil)
 	l.Info("Hello, world!")
+	if got, want := buf.String(), "INFO main: Hello, world!\n"; got != want {
+		t.Errorf("got %q; want %q", got, want)
+	}
+}
+
+func TestLoggerNew(t *testing.T) {
+	// Setup Logger
+	var buf bytes.Buffer
+	l := NewLogger("main: ", stdlog.New(&buf, "", 0), nil)
 
 	// New Logger
 	m := l.New("new: ")
 	m.Info("Hello, world!")
+	if got, want := buf.String(), "INFO new: Hello, world!\n"; got != want {
+		t.Errorf("got %q; want %q", got, want)
+	}
 }
 
 func TestDefault(t *testing.T) {
-	Debug("This is debug")
-	Trace("This is trace")
-	Info("This is info")
-	Warn("This is warn")
+	if got := Default(); &got == &std {
+		t.Errorf("Default [%p] should be std [%p]", got, std)
+	}
 }
 
 func BenchmarkStdlogPrint(b *testing.B) {

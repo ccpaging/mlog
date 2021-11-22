@@ -26,6 +26,9 @@ type ansiTermWriter struct {
 	w io.Writer
 }
 
+// Write may used in io.MultiWriter. If a writer returns an error
+// or n != len(b), io.ErrShortWrite, MultiWriter write operation
+// stops and returns the error; it does not continue down the list.
 func (t *ansiTermWriter) Write(b []byte) (n int, err error) {
 	n = len(b)
 	var cb []byte
@@ -51,7 +54,6 @@ func (t *ansiTermWriter) Write(b []byte) (n int, err error) {
 func TestAnsiTerm(t *testing.T) {
 	logger := NewLogger("", log.New(&ansiTermWriter{w: os.Stdout}, "", log.Lshortfile), nil)
 	logger.Debug("This is a debug")
-	logger.Trace("This is a trace")
 	logger.Info("This is a info")
 	logger.Warn("This is a warn")
 }
