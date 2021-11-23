@@ -20,7 +20,7 @@ import (
 )
 
 func main() {
-	log := mlog.New()
+    log := mlog.New()
     log.Debug("This is Debug")
     log.Info("This is Info")
 }
