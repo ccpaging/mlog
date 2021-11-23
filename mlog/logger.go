@@ -5,67 +5,69 @@ import (
 	stdlog "log"
 )
 
+// There strings define log levels. You may use own strings
+// to replace. Or add some new strings to define new level,
+// such as Ltrace, Lerror, Lfatal, Lpanic
 var (
 	Ldebug string = "DEBG "
 	Linfo  string = "INFO "
-	Lwarn  string = "WARN "
 )
 
 type Logger map[string]*stdlog.Logger
 
-func New(name string) Logger {
-	return NewLogger(name, nil, nil)
+func New() Logger {
+	return NewLogger(nil, nil)
 }
 
-func NewLogger(name string, root *stdlog.Logger, levelStrings []string) Logger {
+// NewLogger creates a Logger with module name and level string.
+func NewLogger(root *stdlog.Logger, levelStrings []string) Logger {
 	if root == nil {
 		root = stdlog.Default()
 	}
 	if len(levelStrings) == 0 {
-		levelStrings = []string{Ldebug, Linfo, Lwarn}
+		levelStrings = []string{Ldebug, Linfo}
 	}
 
-	w, flag := root.Writer(), root.Flags()
+	w, pr, flag := root.Writer(), root.Prefix(), root.Flags()
 	l := make(Logger)
 	for _, level := range levelStrings {
-		l[level] = stdlog.New(w, level+name, flag)
+		l[level] = stdlog.New(w, pr, flag)
 	}
 	return l
 }
 
-func (l Logger) New(name string) Logger {
-	out := make(Logger)
-	for level, ll := range l {
-		w, flag := ll.Writer(), ll.Flags()
-		out[level] = stdlog.New(w, level+name, flag)
+func (l Logger) Set(level string, ll *stdlog.Logger) *stdlog.Logger {
+	old := l[level]
+	l[level] = ll
+	return old
+}
+
+func (l Logger) Get(level string) (ll *stdlog.Logger, ok bool) {
+	ll, ok = l[level]
+	return
+}
+
+func (l Logger) Clear() {
+	for key := range l {
+		delete(l, key)
 	}
-	return out
+}
+
+func (l Logger) CopyFrom(in Logger) {
+	l.Clear()
+	for key, ll := range in {
+		l[key] = ll
+	}
 }
 
 func (l Logger) Debug(v ...interface{}) {
 	if ll, ok := l[Ldebug]; ok {
-		ll.Output(2, fmt.Sprint(v...))
+		ll.Output(2, Ldebug+fmt.Sprint(v...))
 	}
 }
 
 func (l Logger) Info(v ...interface{}) {
 	if ll, ok := l[Linfo]; ok {
-		ll.Output(2, fmt.Sprint(v...))
+		ll.Output(2, Linfo+fmt.Sprint(v...))
 	}
 }
-
-func (l Logger) Warn(v ...interface{}) {
-	if ll, ok := l[Lwarn]; ok {
-		ll.Output(2, fmt.Sprint(v...))
-	}
-}
-
-var (
-	std   = NewLogger("", nil, nil)
-	Debug = std.Debug
-	Info  = std.Info
-	Warn  = std.Warn
-)
-
-// Default returns the standard logger used by the package-level output functions.
-func Default() Logger { return std }

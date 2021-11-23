@@ -9,17 +9,15 @@ import (
 func TestAll(t *testing.T) {
 	type tester struct {
 		output func(v ...interface{})
-		prefix string
 		expect string
 	}
 
 	var buf bytes.Buffer
-	testlog := NewLogger("Logger: ", stdlog.New(&buf, "", 0), nil)
+	testlog := NewLogger(stdlog.New(&buf, "Logger: ", 0), nil)
 
 	var tests = []tester{
-		{testlog.Debug, "Logger: ", "DEBG Logger: hello 23 world\n"},
-		{testlog.Info, "Logger: ", "INFO Logger: hello 23 world\n"},
-		{testlog.Warn, "Logger: ", "WARN Logger: hello 23 world\n"},
+		{testlog.Debug, "Logger: DEBG hello 23 world\n"},
+		{testlog.Info, "Logger: INFO hello 23 world\n"},
 	}
 
 	for _, testcase := range tests {
@@ -34,29 +32,10 @@ func TestAll(t *testing.T) {
 func TestLoggerInfo(t *testing.T) {
 	// Setup Logger
 	var buf bytes.Buffer
-	l := NewLogger("main: ", stdlog.New(&buf, "", 0), nil)
+	l := NewLogger(stdlog.New(&buf, "main: ", 0), nil)
 	l.Info("Hello, world!")
-	if got, want := buf.String(), "INFO main: Hello, world!\n"; got != want {
+	if got, want := buf.String(), "main: INFO Hello, world!\n"; got != want {
 		t.Errorf("got %q; want %q", got, want)
-	}
-}
-
-func TestLoggerNew(t *testing.T) {
-	// Setup Logger
-	var buf bytes.Buffer
-	l := NewLogger("main: ", stdlog.New(&buf, "", 0), nil)
-
-	// New Logger
-	m := l.New("new: ")
-	m.Info("Hello, world!")
-	if got, want := buf.String(), "INFO new: Hello, world!\n"; got != want {
-		t.Errorf("got %q; want %q", got, want)
-	}
-}
-
-func TestDefault(t *testing.T) {
-	if got := Default(); &got == &std {
-		t.Errorf("Default [%p] should be std [%p]", got, std)
 	}
 }
 
@@ -77,7 +56,7 @@ func BenchmarkInfo(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
 
-	l := NewLogger("", stdlog.New(&buf, "", stdlog.LstdFlags), nil)
+	l := NewLogger(stdlog.New(&buf, "", stdlog.LstdFlags), nil)
 
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -91,7 +70,7 @@ func BenchmarkInfoPtr(b *testing.B) {
 	const testString = "test"
 	var buf bytes.Buffer
 
-	l := NewLogger("", stdlog.New(&buf, "", stdlog.LstdFlags), nil)
+	l := NewLogger(stdlog.New(&buf, "", stdlog.LstdFlags), nil)
 	info := l.Info
 
 	b.StartTimer()
