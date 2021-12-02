@@ -25,7 +25,7 @@ func main() {
     log.Info("This is Info")
 }
 ```
-[gist](https://gist.github.com/ccpaging/7b1d19a431b409e0135b7385ad6580ea)
+[gist](https://gist.github.com/ccpaging/a804b916d93e561cbd1a309fe231e4ab)
 
 [golangexample](https://golangexample.com/multi-level-logger-based-on-go-std-log/)
 
