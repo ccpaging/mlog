@@ -10,10 +10,10 @@ import (
 	"log"
 )
 
-func ExampleLogger() {
+func ExampleMultiLogger() {
 	var (
 		buf    bytes.Buffer
-		logger = NewLogger(log.New(&buf, "main: ", log.Lshortfile|log.Lmsgprefix), nil)
+		logger = NewMultiLogger(log.New(&buf, "main: ", log.Lshortfile|log.Lmsgprefix), nil)
 	)
 
 	logger.Info("Hello, log file!")
@@ -23,10 +23,10 @@ func ExampleLogger() {
 	// example_test.go:19: main: INFO Hello, log file!
 }
 
-func ExampleLogger_Debug() {
+func ExampleMultiLogger_Debug() {
 	var (
 		buf    bytes.Buffer
-		logger = NewLogger(log.New(&buf, "main: ", log.Lshortfile), nil)
+		logger = NewMultiLogger(log.New(&buf, "main: ", log.Lshortfile), nil)
 
 		debugln = func(info string) {
 			logger.Debug(info)
@@ -40,10 +40,10 @@ func ExampleLogger_Debug() {
 	// main: example_test.go:32: DEBG Hello world
 }
 
-func ExampleLogger_Info() {
+func ExampleMultiLogger_Info() {
 	var (
 		buf    bytes.Buffer
-		logger = NewLogger(log.New(&buf, "main: ", log.Lmsgprefix), nil)
+		logger = NewMultiLogger(log.New(&buf, "main: ", log.Lmsgprefix), nil)
 	)
 
 	logger.Info("Hello world")

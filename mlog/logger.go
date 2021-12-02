@@ -2,7 +2,7 @@ package mlog
 
 import (
 	"fmt"
-	stdlog "log"
+	"log"
 )
 
 // There strings define log levels. You may use own strings
@@ -13,61 +13,64 @@ var (
 	Linfo  string = "INFO "
 )
 
-type Logger map[string]*stdlog.Logger
+type Logger interface {
+	Output(calldepth int, s string) error
+}
 
-func New() Logger {
-	return NewLogger(nil, nil)
+type MultiLogger map[string]Logger
+
+func New() MultiLogger {
+	return NewMultiLogger(nil, nil)
 }
 
 // NewLogger creates a Logger with module name and level string.
-func NewLogger(root *stdlog.Logger, levelStrings []string) Logger {
+func NewMultiLogger(root Logger, levelStrings []string) MultiLogger {
 	if root == nil {
-		root = stdlog.Default()
+		root = log.Default()
 	}
 	if len(levelStrings) == 0 {
 		levelStrings = []string{Ldebug, Linfo}
 	}
 
-	w, pr, flag := root.Writer(), root.Prefix(), root.Flags()
-	l := make(Logger)
+	ml := make(MultiLogger)
 	for _, level := range levelStrings {
-		l[level] = stdlog.New(w, pr, flag)
+		ml[level] = root
 	}
-	return l
+	return ml
 }
 
-func (l Logger) Set(level string, ll *stdlog.Logger) *stdlog.Logger {
-	old := l[level]
-	l[level] = ll
+func (ml MultiLogger) Set(level string, l Logger) Logger {
+	old := ml[level]
+	ml[level] = l
 	return old
 }
 
-func (l Logger) Get(level string) (ll *stdlog.Logger, ok bool) {
-	ll, ok = l[level]
+func (ml MultiLogger) Get(level string) (l Logger, ok bool) {
+	l, ok = ml[level]
 	return
 }
 
-func (l Logger) Clear() {
-	for key := range l {
-		delete(l, key)
+func (ml MultiLogger) Clear() {
+	for key := range ml {
+		delete(ml, key)
 	}
 }
 
-func (l Logger) CopyFrom(in Logger) {
-	l.Clear()
-	for key, ll := range in {
-		l[key] = ll
+func (ml MultiLogger) CopyFrom(in MultiLogger) {
+	ml.Clear()
+	for key, l := range in {
+		ml[key] = l
 	}
 }
 
-func (l Logger) Debug(v ...interface{}) {
-	if ll, ok := l[Ldebug]; ok {
-		ll.Output(2, Ldebug+fmt.Sprint(v...))
+func (ml MultiLogger) Debug(v ...interface{}) {
+	if l, ok := ml[Ldebug]; ok {
+		l.Output(2, Ldebug+fmt.Sprint(v...))
 	}
 }
 
-func (l Logger) Info(v ...interface{}) {
-	if ll, ok := l[Linfo]; ok {
-		ll.Output(2, Linfo+fmt.Sprint(v...))
+func (ml MultiLogger) Info(v ...interface{}) {
+	if l, ok := ml[Linfo]; ok {
+		l.Output(2, Linfo+fmt.Sprint(v...))
 	}
 }

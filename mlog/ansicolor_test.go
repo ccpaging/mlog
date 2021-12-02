@@ -52,7 +52,7 @@ func (t *ansiTermWriter) Write(b []byte) (n int, err error) {
 }
 
 func TestAnsiTerm(t *testing.T) {
-	logger := NewLogger(log.New(&ansiTermWriter{w: os.Stdout}, "", 0), nil)
+	logger := NewMultiLogger(log.New(&ansiTermWriter{w: os.Stdout}, "", 0), nil)
 	logger.Debug("This is a debug")
 	logger.Info("This is a info")
 }
