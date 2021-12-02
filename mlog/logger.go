@@ -24,29 +24,29 @@ func New() MultiLogger {
 }
 
 // NewLogger creates a Logger with module name and level string.
-func NewMultiLogger(root Logger, levelStrings []string) MultiLogger {
+func NewMultiLogger(root Logger, keys []string) MultiLogger {
 	if root == nil {
 		root = log.Default()
 	}
-	if len(levelStrings) == 0 {
-		levelStrings = []string{Ldebug, Linfo}
+	if len(keys) == 0 {
+		keys = []string{Ldebug, Linfo}
 	}
 
 	ml := make(MultiLogger)
-	for _, level := range levelStrings {
+	for _, level := range keys {
 		ml[level] = root
 	}
 	return ml
 }
 
-func (ml MultiLogger) Set(level string, l Logger) Logger {
-	old := ml[level]
-	ml[level] = l
+func (ml MultiLogger) Set(key string, value Logger) Logger {
+	old := ml[key]
+	ml[key] = value
 	return old
 }
 
-func (ml MultiLogger) Get(level string) (l Logger, ok bool) {
-	l, ok = ml[level]
+func (ml MultiLogger) Get(key string) (l Logger, ok bool) {
+	l, ok = ml[key]
 	return
 }
 
@@ -58,8 +58,8 @@ func (ml MultiLogger) Clear() {
 
 func (ml MultiLogger) CopyFrom(in MultiLogger) {
 	ml.Clear()
-	for key, l := range in {
-		ml[key] = l
+	for key, value := range in {
+		ml[key] = value
 	}
 }
 
