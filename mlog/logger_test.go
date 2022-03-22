@@ -8,7 +8,7 @@ import (
 
 func TestAll(t *testing.T) {
 	type tester struct {
-		output func(v ...interface{})
+		output func(v ...any)
 		expect string
 	}
 

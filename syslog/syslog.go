@@ -112,56 +112,56 @@ func (l *Logger) Close() error {
 
 // Emerg logs a message with severity LOG_EMERG, ignoring the severity
 // passed to New.
-func (l *Logger) Emerg(v ...interface{}) error {
+func (l *Logger) Emerg(v ...any) error {
 	_, err := l.out.writeAndRetry(LOG_EMERG, fmt.Sprintln(v...))
 	return err
 }
 
 // Alert logs a message with severity LOG_ALERT, ignoring the severity
 // passed to New.
-func (l *Logger) Alert(v ...interface{}) error {
+func (l *Logger) Alert(v ...any) error {
 	_, err := l.out.writeAndRetry(LOG_ALERT, fmt.Sprintln(v...))
 	return err
 }
 
 // Crit logs a message with severity LOG_CRIT, ignoring the severity
 // passed to New.
-func (l *Logger) Crit(v ...interface{}) error {
+func (l *Logger) Crit(v ...any) error {
 	_, err := l.out.writeAndRetry(LOG_CRIT, fmt.Sprintln(v...))
 	return err
 }
 
 // Err logs a message with severity LOG_ERR, ignoring the severity
 // passed to New.
-func (l *Logger) Err(v ...interface{}) error {
+func (l *Logger) Err(v ...any) error {
 	_, err := l.out.writeAndRetry(LOG_ERR, fmt.Sprintln(v...))
 	return err
 }
 
 // Warning logs a message with severity LOG_WARNING, ignoring the
 // severity passed to New.
-func (l *Logger) Warning(v ...interface{}) error {
+func (l *Logger) Warning(v ...any) error {
 	_, err := l.out.writeAndRetry(LOG_WARNING, fmt.Sprintln(v...))
 	return err
 }
 
 // Notice logs a message with severity LOG_NOTICE, ignoring the
 // severity passed to New.
-func (l *Logger) Notice(v ...interface{}) error {
+func (l *Logger) Notice(v ...any) error {
 	_, err := l.out.writeAndRetry(LOG_NOTICE, fmt.Sprintln(v...))
 	return err
 }
 
 // Info logs a message with severity LOG_INFO, ignoring the severity
 // passed to New.
-func (l *Logger) Info(v ...interface{}) error {
+func (l *Logger) Info(v ...any) error {
 	_, err := l.out.writeAndRetry(LOG_INFO, fmt.Sprintln(v...))
 	return err
 }
 
 // Debug logs a message with severity LOG_DEBUG, ignoring the severity
 // passed to New.
-func (l *Logger) Debug(v ...interface{}) error {
+func (l *Logger) Debug(v ...any) error {
 	_, err := l.out.writeAndRetry(LOG_DEBUG, fmt.Sprintln(v...))
 	return err
 }

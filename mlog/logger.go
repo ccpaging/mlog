@@ -63,13 +63,13 @@ func (ml MultiLogger) CopyFrom(in MultiLogger) {
 	}
 }
 
-func (ml MultiLogger) Debug(v ...interface{}) {
+func (ml MultiLogger) Debug(v ...any) {
 	if l, ok := ml[Ldebug]; ok {
 		l.Output(2, Ldebug+fmt.Sprint(v...))
 	}
 }
 
-func (ml MultiLogger) Info(v ...interface{}) {
+func (ml MultiLogger) Info(v ...any) {
 	if l, ok := ml[Linfo]; ok {
 		l.Output(2, Linfo+fmt.Sprint(v...))
 	}
