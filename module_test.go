@@ -6,17 +6,17 @@ import (
 	"github.com/ccpaging/log"
 )
 
-var moduleLog = log.GlobalLogger().WithName("[module] ")
+var moduleLog = log.Default().WithName("[module] ")
 
 func TestModuleLogging(t *testing.T) {
 	logger := log.NewLogger("test: ", log.DefaultSettings())
-	log.InitGlobalLogger(logger)
+	log.Init(logger)
 
 	moduleLog.Debug("debug log. ", "key=", "value")
 	moduleLog.Info("info log. ", "key=", "value")
 	moduleLog.Warn("warning log. ", "key=", "value")
 	moduleLog.Error("error log. ", "key=", "value")
 
-	log.CloseGlobalLogger()
+	log.Close()
 	moduleLog.Error("error log. ", "key=", "value")
 }

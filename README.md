@@ -16,11 +16,10 @@ NOTHING ELSE
 package main
 
 import (
-    "github.com/ccpaging/log/mlog"
+    "github.com/ccpaging/log"
 )
 
 func main() {
-    log := mlog.New()
     log.Debug("This is Debug")
     log.Info("This is Info")
 }

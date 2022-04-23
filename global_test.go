@@ -59,13 +59,13 @@ func TestLoggingAfterInitialized(t *testing.T) {
 			}
 
 			logger := log.NewLogger("test: ", &testCase.Settings)
-			log.InitGlobalLogger(logger)
+			log.Init(logger)
 
 			log.Debug("global debug log")
 			log.Info("global info log")
 			log.Warn("global warning log")
 			log.Error("global error log")
-			log.CloseGlobalLogger()
+			log.Close()
 
 			if testCase.Settings.EnableFile {
 				logs, err := ioutil.ReadFile(filePath)

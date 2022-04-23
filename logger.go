@@ -14,22 +14,21 @@ import (
 	"sync"
 
 	"github.com/ccpaging/log/file"
-	"github.com/ccpaging/log/mlog"
 )
 
 var (
-	LogFlag = stdlog.Ldate | stdlog.Ltime | stdlog.Lmsgprefix
-	DEBUG   = false
-	COLOR   = false
+	LstdFlags = stdlog.LstdFlags | stdlog.Lmsgprefix
+	DEBUG     = false
+	COLOR     = false
 )
 
 const (
-	Ldebug = "DEBG "
-	Ltrace = "TRAC "
-	Linfo  = "INFO "
-	Lwarn  = "WARN "
-	Lerror = "EROR "
-	Lfatal = "FATAL "
+	Ldebug string = "DEBG "
+	Ltrace string = "TRAC "
+	Linfo  string = "INFO "
+	Lwarn  string = "WARN "
+	Lerror string = "EROR "
+	Lfatal string = "FATAL "
 )
 
 var levelStrings = []string{Ldebug, Ltrace, Linfo, Lwarn, Lerror, Lfatal}
@@ -79,7 +78,7 @@ func DefaultSettings() *Settings {
 type Logger struct {
 	mu   sync.Mutex
 	name string
-	core mlog.MultiLogger
+	core map[string]*stdlog.Logger
 	cw   io.Writer
 	fw   *file.File
 	cal  int // the level index of console output
@@ -89,9 +88,9 @@ type Logger struct {
 func New(name string, root *stdlog.Logger, level string) *Logger {
 	if root == nil {
 		root = stdlog.Default()
-		root.SetFlags(LogFlag)
+		root.SetFlags(LstdFlags)
 	}
-	core := make(mlog.MultiLogger)
+	core := make(map[string]*stdlog.Logger)
 	for _, level := range levelStrings {
 		core[level] = root
 	}
@@ -178,7 +177,7 @@ func NewLogger(name string, s *Settings) *Logger {
 
 	l := &Logger{
 		name: name,
-		core: make(mlog.MultiLogger),
+		core: make(map[string]*stdlog.Logger),
 		cw:   newConsoleWriter(s),
 		fw:   newFileWriter(s),
 		cal:  ltoi(s.ConsoleLevel),
@@ -187,7 +186,7 @@ func NewLogger(name string, s *Settings) *Logger {
 
 	for i, k := range levelStrings {
 		if w := l.levelWriter(i); w != nil {
-			l.core.Set(k, stdlog.New(w, "", LogFlag))
+			l.core[k] = stdlog.New(w, "", LstdFlags)
 		}
 	}
 	return l
@@ -211,7 +210,15 @@ func (l *Logger) CopyFrom(in *Logger) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	l.core.CopyFrom(in.core)
+	// clear map
+	for key := range l.core {
+		delete(l.core, key)
+	}
+	// copy from
+	for key, value := range in.core {
+		l.core[key] = value
+	}
+
 	l.cw = in.cw
 	l.fw = in.fw
 	l.cal = in.cal
@@ -227,73 +234,126 @@ func (l *Logger) Close() {
 	}
 	// Clear data
 	l.fw = nil
-	l.core.Clear()
-}
-
-func (l *Logger) OutputL(calldepth int, level string, v ...any) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-
-	if ll, ok := l.core.Get(level); ok {
-		ll.Output(2+calldepth, level+l.name+fmt.Sprint(v...))
+	// clear map
+	for key := range l.core {
+		delete(l.core, key)
 	}
 }
 
-func (l *Logger) Debug(v ...any) {
-	l.OutputL(1, Ldebug, v...)
+func (l *Logger) Loutput(calldepth int, level string, a ...any) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	if ll, ok := l.core[level]; ok {
+		ll.Output(2+calldepth, level+l.name+fmt.Sprint(a...))
+	}
 }
 
-func (l *Logger) Trace(v ...any) {
-	l.OutputL(1, Ltrace, v...)
+func (l *Logger) Output(calldepth int, s string) {
+	l.Loutput(1+calldepth, Linfo, s)
 }
 
-func (l *Logger) Info(v ...any) {
-	l.OutputL(1, Linfo, v...)
+func (l *Logger) Debug(a ...any) {
+	l.Loutput(1, Ldebug, a...)
 }
 
-func (l *Logger) Warn(v ...any) {
-	l.OutputL(1, Lwarn, v...)
+func (l *Logger) Trace(a ...any) {
+	l.Loutput(1, Ltrace, a...)
 }
 
-func (l *Logger) Error(v ...any) {
-	l.OutputL(1, Lerror, v...)
+func (l *Logger) Info(a ...any) {
+	l.Loutput(1, Linfo, a...)
 }
 
-func (l *Logger) Fatal(v ...any) {
-	l.OutputL(1, Lfatal, v...)
+func (l *Logger) Warn(a ...any) {
+	l.Loutput(1, Lwarn, a...)
+}
+
+func (l *Logger) Error(a ...any) {
+	l.Loutput(1, Lerror, a...)
+}
+
+func (l *Logger) Print(a ...any) {
+	l.Loutput(1, Linfo, a...)
+}
+
+func (l *Logger) Fatal(a ...any) {
+	l.Loutput(1, Lfatal, a...)
 	l.Close()
 }
 
-func (l *Logger) OutputLln(calldepth int, level string, v ...any) {
+func (l *Logger) Loutputln(calldepth int, level string, a ...any) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if ll, ok := l.core.Get(level); ok {
-		ll.Output(2+calldepth, level+l.name+fmt.Sprintln(v...))
+	if ll, ok := l.core[level]; ok {
+		ll.Output(2+calldepth, level+l.name+fmt.Sprintln(a...))
 	}
 }
 
-func (l *Logger) Debugln(v ...any) {
-	l.OutputLln(1, Ldebug, v...)
+func (l *Logger) Debugln(a ...any) {
+	l.Loutputln(1, Ldebug, a...)
 }
 
-func (l *Logger) Traceln(v ...any) {
-	l.OutputLln(1, Ltrace, v...)
+func (l *Logger) Traceln(a ...any) {
+	l.Loutputln(1, Ltrace, a...)
 }
 
-func (l *Logger) Infoln(v ...any) {
-	l.OutputLln(1, Linfo, v...)
+func (l *Logger) Infoln(a ...any) {
+	l.Loutputln(1, Linfo, a...)
 }
 
-func (l *Logger) Warnln(v ...any) {
-	l.OutputLln(1, Lwarn, v...)
+func (l *Logger) Warnln(a ...any) {
+	l.Loutputln(1, Lwarn, a...)
 }
 
-func (l *Logger) Errorln(v ...any) {
-	l.OutputLln(1, Lerror, v...)
+func (l *Logger) Errorln(a ...any) {
+	l.Loutputln(1, Lerror, a...)
 }
 
-func (l *Logger) Fatalln(v ...any) {
-	l.OutputLln(1, Lfatal, v...)
+func (l *Logger) Println(a ...any) {
+	l.Loutputln(1, Linfo, a...)
+}
+
+func (l *Logger) Fatalln(a ...any) {
+	l.Loutputln(1, Lfatal, a...)
+	l.Close()
+}
+
+func (l *Logger) Loutputf(calldepth int, level string, format string, a ...any) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	if ll, ok := l.core[level]; ok {
+		ll.Output(2+calldepth, level+l.name+fmt.Sprintf(format, a...))
+	}
+}
+
+func (l *Logger) Debugf(format string, a ...any) {
+	l.Loutputf(1, Ldebug, format, a...)
+}
+
+func (l *Logger) Tracef(format string, a ...any) {
+	l.Loutputf(1, Ltrace, format, a...)
+}
+
+func (l *Logger) Infof(format string, a ...any) {
+	l.Loutputf(1, Linfo, format, a...)
+}
+
+func (l *Logger) Warnf(format string, a ...any) {
+	l.Loutputf(1, Lwarn, format, a...)
+}
+
+func (l *Logger) Errorf(format string, a ...any) {
+	l.Loutputf(1, Lerror, format, a...)
+}
+
+func (l *Logger) Printf(format string, a ...any) {
+	l.Loutputf(1, Linfo, format, a...)
+}
+
+func (l *Logger) Fatalf(format string, a ...any) {
+	l.Loutputf(1, Lfatal, format, a...)
 	l.Close()
 }
