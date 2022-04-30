@@ -1,4 +1,4 @@
-package log
+package mlog
 
 var global *Logger = New("root ", nil, "")
 

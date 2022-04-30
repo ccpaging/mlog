@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See License.txt for license information.
 
-package log
+package mlog
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ccpaging/log/file"
+	"github.com/ccpaging/mlog/file"
 )
 
 var (

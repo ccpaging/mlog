@@ -1,11 +1,11 @@
-package log_test
+package mlog_test
 
 import (
 	"bytes"
 	stdlog "log"
 	"testing"
 
-	"github.com/ccpaging/log"
+	log "github.com/ccpaging/mlog"
 )
 
 func TestStdLogAt(t *testing.T) {

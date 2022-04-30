@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ccpaging/log/syslog"
+	"github.com/ccpaging/mlog/syslog"
 )
 
 func ExampleDial() {

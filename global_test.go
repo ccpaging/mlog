@@ -1,4 +1,4 @@
-package log_test
+package mlog_test
 
 import (
 	"io/ioutil"
@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ccpaging/log"
+	log "github.com/ccpaging/mlog"
 )
 
 func TestLoggingBeforeInitialized(t *testing.T) {
