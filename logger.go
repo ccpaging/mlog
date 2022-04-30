@@ -18,8 +18,6 @@ import (
 
 var (
 	LstdFlags = stdlog.LstdFlags | stdlog.Lmsgprefix
-	DEBUG     = false
-	COLOR     = false
 )
 
 const (
@@ -53,8 +51,9 @@ func ltoi(s string) int {
 }
 
 type Settings struct {
-	EnableConsole bool
-	ConsoleLevel  string
+	EnableConsole    bool
+	ConsoleLevel     string
+	ConsoleAnsiColor bool
 
 	EnableFile      bool
 	FileLevel       string
@@ -65,13 +64,14 @@ type Settings struct {
 
 func DefaultSettings() *Settings {
 	return &Settings{
-		EnableConsole:   true,
-		ConsoleLevel:    Ldebug,
-		EnableFile:      false,
-		FileLevel:       Linfo,
-		FileLocation:    "",
-		FileLimitSize:   "10M",
-		FileBackupCount: 7,
+		EnableConsole:    true,
+		ConsoleLevel:     Ldebug,
+		ConsoleAnsiColor: false,
+		EnableFile:       false,
+		FileLevel:        Linfo,
+		FileLocation:     "",
+		FileLimitSize:    "10M",
+		FileBackupCount:  7,
 	}
 }
 
@@ -108,7 +108,7 @@ func newConsoleWriter(s *Settings) io.Writer {
 	if !s.EnableConsole {
 		return nil
 	}
-	if COLOR {
+	if s.ConsoleAnsiColor {
 		return &ansiTerm{os.Stderr}
 	}
 	return os.Stderr
@@ -170,11 +170,6 @@ func (l *Logger) levelWriter(n int) io.Writer {
 }
 
 func NewLogger(name string, s *Settings) *Logger {
-	if DEBUG {
-		s.ConsoleLevel = "debug"
-		s.FileLevel = "debug"
-	}
-
 	l := &Logger{
 		name: name,
 		core: make(map[string]*stdlog.Logger),

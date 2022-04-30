@@ -25,12 +25,9 @@ func TestNewLogger(t *testing.T) {
 	testFile := testFiles[0]
 	defer os.Remove(testFile)
 
-	prev := COLOR
-	COLOR = true
-
 	l := NewLogger("test ",
 		&Settings{
-			EnableConsole: true, ConsoleLevel: "debug",
+			EnableConsole: true, ConsoleLevel: "debug", ConsoleAnsiColor: true,
 			EnableFile: true, FileLevel: "info", FileLocation: testFile, FileLimitSize: "5k", FileBackupCount: 1,
 		})
 	l.Debug("this is debug")
@@ -39,7 +36,7 @@ func TestNewLogger(t *testing.T) {
 	l.Warn("this is warn")
 	l.Error(errors.New("this is error"))
 	l.Close()
-	COLOR = prev
+
 	l.Info("Omitted after Close()")
 
 	if contents, err := ioutil.ReadFile(testFile); err != nil {
@@ -53,7 +50,7 @@ func TestLoggerDebug(t *testing.T) {
 	var buf bytes.Buffer
 	l := New("test: ", log.New(&buf, "", log.Lshortfile|log.Lmsgprefix), "")
 	l.Debug("This is debug")
-	if want, got := "logger_test.go:55: DEBG test: This is debug\n", buf.String(); want != got {
+	if want, got := "logger_test.go:52: DEBG test: This is debug\n", buf.String(); want != got {
 		t.Errorf("logger debug should match %q is %q", want, got)
 	}
 }
