@@ -1,3 +1,7 @@
+# The project is moved to:
+
+https://github.com/ccpaging/log
+
 # [Multi-level logger based on go std log](https://golangexample.com/multi-level-logger-based-on-go-std-log/)
 
 [![License](https://img.shields.io/badge/license-BSD-green)](https://github.com/ccpaging/mlog/blob/master/LICENSE) [![GoDoc](https://godoc.org/github.com/ccpaging/mlog?status.svg)](https://godoc.org/github.com/ccpaging/mlog) [![Build Status](https://github.com/ccpaging/mlog/actions/workflows/go.yml/badge.svg)](https://github.com/ccpaging/mlog/actions/workflows/go.yml) [![Maintainability](https://codeclimate.com/github/ccpaging/mlog/badges/gpa.svg)](https://codeclimate.com/github/ccpaging/mlog/maintainability)
